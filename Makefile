@@ -31,6 +31,17 @@ help:
 	@echo "    build              - Build binaries for multiple platforms"
 	@echo "    mod-tidy-check     - Check if go mod tidy is needed"
 	@echo ""
+	@echo "  $(GREEN)Docker targets:$(NC)"
+	@echo "    docker-build       - Build Docker image"
+	@echo "    docker-run         - Run Docker container"
+	@echo "    docker-compose-up  - Start services with docker-compose"
+	@echo "    docker-compose-down- Stop services with docker-compose"
+	@echo ""
+	@echo "  $(GREEN)Code generation targets:$(NC)"
+	@echo "    generate           - Generate code (if using go generate)"
+	@echo "    benchmark          - Run benchmarks"
+	@echo "    profile            - Run tests with profiling"
+	@echo ""
 	@echo "  $(GREEN)Convenience targets:$(NC)"
 	@echo "    all                - Run all quality checks (test, lint, security, vuln-check)"
 	@echo "    ci-local           - Run the same checks as CI pipeline"
@@ -229,6 +240,47 @@ EOF\
 ## all: Run all quality checks
 all: deps test lint security vulnerability-check mod-tidy-check
 	@echo "$(GREEN)All quality checks passed!$(NC)"
+
+## docker-build: Build Docker image
+docker-build:
+	@echo "$(YELLOW)Building Docker image...$(NC)"
+	docker build -t $(BINARY_NAME):latest .
+	@echo "$(GREEN)Docker image built successfully!$(NC)"
+
+## docker-run: Run Docker container
+docker-run:
+	@echo "$(YELLOW)Running Docker container...$(NC)"
+	docker run -p 8080:8080 $(BINARY_NAME):latest
+
+## docker-compose-up: Start services with docker-compose
+docker-compose-up:
+	@echo "$(YELLOW)Starting services with docker-compose...$(NC)"
+	docker-compose up -d
+	@echo "$(GREEN)Services started!$(NC)"
+
+## docker-compose-down: Stop services with docker-compose
+docker-compose-down:
+	@echo "$(YELLOW)Stopping services with docker-compose...$(NC)"
+	docker-compose down
+	@echo "$(GREEN)Services stopped!$(NC)"
+
+## generate: Generate code (if using go generate)
+generate:
+	@echo "$(YELLOW)Generating code...$(NC)"
+	go generate ./...
+	@echo "$(GREEN)Code generation completed!$(NC)"
+
+## benchmark: Run benchmarks
+benchmark:
+	@echo "$(YELLOW)Running benchmarks...$(NC)"
+	go test -bench=. -benchmem ./...
+	@echo "$(GREEN)Benchmarks completed!$(NC)"
+
+## profile: Run tests with profiling
+profile:
+	@echo "$(YELLOW)Running tests with profiling...$(NC)"
+	go test -cpuprofile=cpu.prof -memprofile=mem.prof ./...
+	@echo "$(GREEN)Profiling completed!$(NC)"
 
 ## ci-local: Run the same checks as CI pipeline
 ci-local: all build
