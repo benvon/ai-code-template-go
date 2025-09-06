@@ -112,7 +112,6 @@ dockers:
     use: docker
     extra_files:
       - go.mod
-      - go.sum
       - README.md
       - LICENSE
     build_flag_templates:
