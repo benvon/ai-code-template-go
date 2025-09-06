@@ -31,22 +31,28 @@ func main() {
 
 	// Create HTTP server
 	mux := http.NewServeMux()
-	
+
 	// Register handlers
 	handlers.RegisterRoutes(mux)
-	
+
 	// Add health check endpoint
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, `{"status":"healthy","version":"%s","timestamp":"%s"}`, version, time.Now().Format(time.RFC3339))
+		_, err := fmt.Fprintf(w, `{"status":"healthy","version":"%s","timestamp":"%s"}`, version, time.Now().Format(time.RFC3339))
+		if err != nil {
+			log.Printf("Failed to write health check response: %v", err)
+		}
 	})
 
 	// Add version endpoint
 	mux.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, `{"version":"%s","commit":"%s","date":"%s","builtBy":"%s"}`, version, commit, date, builtBy)
+		_, err := fmt.Fprintf(w, `{"version":"%s","commit":"%s","date":"%s","builtBy":"%s"}`, version, commit, date, builtBy)
+		if err != nil {
+			log.Printf("Failed to write version response: %v", err)
+		}
 	})
 
 	server := &http.Server{
