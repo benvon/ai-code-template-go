@@ -115,6 +115,7 @@ dockers:
       - README.md
       - LICENSE
     build_flag_templates:
+      - "--build-arg=BINARY_NAME={{.ProjectName}}"
       - "--platform=linux/amd64"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
