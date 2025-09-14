@@ -1,4 +1,4 @@
-# Makefile for go-table-maker
+# Makefile for whats-flying-over-me
 # This makefile provides targets that mirror the CI pipeline and help with development
 
 .PHONY: help test lint security vulnerability-check build clean setup deps verify mod-tidy-check all ci-local clean-template
@@ -8,7 +8,7 @@
 # =============================================================================
 
 GO_VERSION := 1.24.4
-BINARY_NAME := table-maker
+BINARY_NAME := whats-flying-over-me
 BUILD_DIR := ./bin
 
 # Colors for output
@@ -155,17 +155,17 @@ update-tool-versions:
 	@while IFS= read -r line; do \
 		if echo "$$line" | grep -q "#pinned"; then \
 			echo "$$line" >> .tool-versions.tmp; \
-			$(call print_info,Keeping pinned: $$line); \
+			echo "$(YELLOW)Keeping pinned: $$line$(NC)"; \
 		else \
 			tool=$$(echo "$$line" | awk '{print $$1}'); \
 			if [ -n "$$tool" ] && [ "$$tool" != "#" ]; then \
 				latest=$$(asdf latest "$$tool" 2>/dev/null || echo "unknown"); \
-				if [ "$$latest" != "unknown" ]; then \
+				if [ "$$latest" != "unknown" ] && ! echo "$$latest" | grep -q "unable to load\|does not have\|unknown"; then \
 					echo "$$tool $$latest" >> .tool-versions.tmp; \
-					$(call print_success,Updated $$tool to $$latest); \
+					echo "$(GREEN)Updated $$tool to $$latest$(NC)"; \
 				else \
 					echo "$$line" >> .tool-versions.tmp; \
-					$(call print_info,Keeping $$line (no update available)); \
+					echo "$(YELLOW)Keeping $$line (no update available)$(NC)"; \
 				fi; \
 			else \
 				echo "$$line" >> .tool-versions.tmp; \
@@ -350,7 +350,6 @@ clean-template:
 	@echo "  - Update README.md to remove template-specific content"
 	@echo "  - Replace main.go with a minimal starter"
 	@echo "  - Update go.mod module path"
-	@echo "  - Remove AGENTS.md"
 	@echo "  - Remove this target from Makefile"
 	@echo ""
 	@read -p "Enter your new module path (e.g., github.com/username/project-name): " module_path && \
@@ -421,10 +420,9 @@ Use `make help` to see all available commands.\
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.\
 EOF\
 	$(call print_info,Removing template-specific files...) && \
-	rm -f AGENTS.md && \
 	$(call print_info,Updating Makefile...) && \
 	sed -i '/## clean-template:/,/^$$/d' Makefile && \
-	sed -i 's/table-maker/'"$$project_name"'/g' Makefile && \
+	sed -i 's/whats-flying-over-me/'"$$project_name"'/g' Makefile && \
 	$(call print_info,Running go mod tidy...) && \
 	go mod tidy && \
 	$(call print_success,Template cleanup completed!) && \
