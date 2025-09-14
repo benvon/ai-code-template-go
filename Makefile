@@ -7,8 +7,7 @@
 # Configuration
 # =============================================================================
 
-GO_VERSION := 1.24.4
-BINARY_NAME := whats-flying-over-me
+BINARY_NAME := @$(basename "$(git rev-parse --show-toplevel)" )
 BUILD_DIR := ./bin
 
 # Colors for output
@@ -93,10 +92,6 @@ help:
 
 ## setup: Install required development tools via asdf
 setup: check-go-version
-	$(call print_info,Installing development tools via asdf...)
-	@asdf plugin add golangci-lint || true
-	@asdf plugin add gosec || true
-	@asdf plugin add govulncheck || true
 	$(call print_info,Installing Go development tools...)
 	@asdf install golang || echo "Go already installed"
 	@asdf install golangci-lint || echo "golangci-lint already installed"
@@ -109,8 +104,8 @@ setup: check-go-version
 ## check-go-version: Verify Go version matches project requirements
 check-go-version:
 	$(call print_info,Checking Go version...)
-	@if ! go version | grep -q "go1.24"; then \
-		$(call print_error,Error: Go version 1.24+ required. Current version:); \
+	@if ! go version | grep -q "go1.25"; then \
+		$(call print_error,Error: Go version 1.25+ required. Current version:); \
 		go version; \
 		$(call print_info,Please update Go using: asdf install); \
 		exit 1; \
