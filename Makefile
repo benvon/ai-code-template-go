@@ -1,4 +1,3 @@
-# Makefile for whats-flying-over-me
 # This makefile provides targets that mirror the CI pipeline and help with development
 
 .PHONY: help test lint security vulnerability-check build clean setup deps verify mod-tidy-check all ci-local clean-template
