@@ -7,8 +7,10 @@
 # Configuration
 # =============================================================================
 
-BINARY_NAME := @$(basename "$(git rev-parse --show-toplevel)" )
+REQUIRED_GO_VERSION := $(shell awk '/^go[[:space:]]+/ {print $$2; exit}' go.mod)
+BINARY_NAME := $(shell git rev-parse --show-toplevel | xargs basename)
 BUILD_DIR := ./bin
+GOVULNCHECK_VERSION ?= 1.1.4
 
 # Colors for output
 GREEN := \033[32m
@@ -92,6 +94,10 @@ help:
 
 ## setup: Install required development tools via asdf
 setup: check-go-version
+	$(call print_info,Installing development tools via asdf...)
+	@asdf plugin add golangci-lint || true
+	@asdf plugin add gosec || true
+	@asdf plugin add govulncheck || true
 	$(call print_info,Installing Go development tools...)
 	@asdf install golang || echo "Go already installed"
 	@asdf install golangci-lint || echo "golangci-lint already installed"
@@ -104,9 +110,25 @@ setup: check-go-version
 ## check-go-version: Verify Go version matches project requirements
 check-go-version:
 	$(call print_info,Checking Go version...)
-	@if ! go version | grep -q "go1.25"; then \
-		$(call print_error,Error: Go version 1.25+ required. Current version:); \
-		go version; \
+	@if [ -z "$(REQUIRED_GO_VERSION)" ]; then \
+		$(call print_error,Error: Unable to determine required Go version from go.mod); \
+		exit 1; \
+	fi
+	@if ! command -v go >/dev/null 2>&1; then \
+		$(call print_error,Error: Go $(REQUIRED_GO_VERSION)+ required but Go is not installed or not on PATH.); \
+		exit 1; \
+	fi
+	@current_version_raw=$$(go env GOVERSION 2>/dev/null || go version | awk '{print $$3}'); \
+	current_version=$${current_version_raw#go}; \
+	required_version="$(REQUIRED_GO_VERSION)"; \
+	if [ -z "$$current_version" ]; then \
+		$(call print_error,Error: Unable to determine installed Go version.); \
+		go version || true; \
+		exit 1; \
+	fi; \
+	highest=$$(printf '%s\n%s\n' "$$required_version" "$$current_version" | sort -V | tail -1); \
+	if [ "$$highest" != "$$current_version" ]; then \
+		$(call print_error,Error: Go version $$required_version or newer required. Current version: go$$current_version); \
 		$(call print_info,Please update Go using: asdf install); \
 		exit 1; \
 	fi
@@ -135,7 +157,11 @@ verify-tools:
 	$(call print_info,Verifying development tools...)
 	@echo "Go version: $$(go version)"
 	@echo "golangci-lint version: $$(golangci-lint version)"
-	@echo "govulncheck version: $$(govulncheck -version 2>/dev/null || echo 'govulncheck not available')"
+	@if command -v govulncheck >/dev/null 2>&1 && govulncheck -version >/dev/null 2>&1; then \
+		echo "govulncheck version: $$(govulncheck -version)"; \
+	else \
+		echo "govulncheck version: fallback via go run v$(GOVULNCHECK_VERSION)"; \
+	fi
 	@echo "gosec version: $$(gosec -version 2>/dev/null || echo 'gosec not available')"
 	$(call print_success,Tool verification completed!)
 
@@ -241,17 +267,23 @@ security:
 ## vulnerability-check: Run govulncheck
 vulnerability-check:
 	$(call print_info,Checking for vulnerabilities...)
-	govulncheck ./...
+	@./scripts/ensure_govulncheck.sh $(GOVULNCHECK_VERSION) ./...
 	$(call print_success,Vulnerability check completed!)
 
 ## mod-tidy-check: Check if go mod tidy is needed
 mod-tidy-check:
 	$(call print_info,Checking if go mod tidy is needed...)
 	@go mod tidy
-	@git diff --exit-code go.mod go.sum || { \
-		$(call print_error,Error: go.mod or go.sum is not tidy. Please run 'go mod tidy' and commit the changes.); \
+	@files="go.mod"; \
+	if git ls-files --error-unmatch go.sum >/dev/null 2>&1; then \
+		files="$$files go.sum"; \
+	elif [ -f go.sum ]; then \
+		files="$$files go.sum"; \
+	fi; \
+	if ! git diff --exit-code $$files >/dev/null; then \
+		$(call print_error,Error: go module files are out of date. Please run 'go mod tidy' and commit the resulting changes.); \
 		exit 1; \
-	}
+	fi
 	$(call print_success,go.mod and go.sum are tidy!)
 
 # =============================================================================
@@ -345,6 +377,7 @@ clean-template:
 	@echo "  - Update README.md to remove template-specific content"
 	@echo "  - Replace main.go with a minimal starter"
 	@echo "  - Update go.mod module path"
+	@echo "  - Remove AGENTS.md"
 	@echo "  - Remove this target from Makefile"
 	@echo ""
 	@read -p "Enter your new module path (e.g., github.com/username/project-name): " module_path && \
@@ -415,6 +448,7 @@ Use `make help` to see all available commands.\
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.\
 EOF\
 	$(call print_info,Removing template-specific files...) && \
+	rm -f AGENTS.md && \
 	$(call print_info,Updating Makefile...) && \
 	sed -i '/## clean-template:/,/^$$/d' Makefile && \
 	sed -i 's/whats-flying-over-me/'"$$project_name"'/g' Makefile && \
