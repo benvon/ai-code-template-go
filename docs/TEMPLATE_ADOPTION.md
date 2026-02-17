@@ -30,6 +30,15 @@ This checklist helps teams safely bootstrap a new repository from this template.
 - Dismiss stale approvals on new commits.
 - Restrict who can push to `main`.
 
+## Update Ownership (Template vs Downstream)
+
+- Template concern: scaffolding/toolchain/workflow pin updates are managed by `template-maintenance.yml`.
+- Downstream concern: project dependency updates are managed by Dependabot (`gomod`).
+
+By default, this template keeps Dependabot focused on Go modules only. This avoids conflicts with template-maintenance PRs that also touch workflow/tooling versions.
+
+If your downstream repo wants independent workflow action updates, you can opt in by adding a `github-actions` updater block in your repo-specific Dependabot config after adoption.
+
 ## First PR Acceptance Criteria
 
 - CI workflows all pass.

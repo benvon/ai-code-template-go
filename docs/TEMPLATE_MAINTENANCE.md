@@ -2,6 +2,15 @@
 
 This template uses a manifest-driven maintenance system to keep pinned versions aligned across tooling, workflows, and scripts.
 
+## Ownership Model
+
+Use two control planes to avoid update conflicts:
+
+- Template control plane (this repository): `template-maintenance.yml` + `maintenance/versions.yaml`
+- Downstream control plane (repos created from this template): Dependabot `gomod` updates
+
+In this template repository, GitHub Actions/workflow pin updates are owned by template maintenance, not Dependabot.
+
 ## Source of Truth
 
 `maintenance/versions.yaml` is authoritative for:
@@ -25,6 +34,13 @@ The workflow:
 2. synchronizes repository files from the manifest (`sync_files.sh`)
 3. validates drift and pinning policy (`validate.sh`)
 4. opens a PR with a maintenance checklist and risk summary
+
+This workflow is responsible for:
+
+- `.github/workflows/*.yml` action pin updates
+- `.tool-versions`
+- `.pre-commit-config.yaml`
+- pinned tool/module versions referenced by scripts and Make targets
 
 ## Local Maintenance Commands
 
