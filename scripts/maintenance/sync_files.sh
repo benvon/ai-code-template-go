@@ -56,9 +56,11 @@ awk -v rev1="${PRE_COMMIT_HOOKS_REV}" -v rev2="${PRE_COMMIT_GOLANG_REV}" '
   {
     if ($0 ~ /repo: https:\/\/github.com\/pre-commit\/pre-commit-hooks/) { target=1; print; next }
     if ($0 ~ /repo: https:\/\/github.com\/dnephin\/pre-commit-golang/) { target=2; print; next }
+    if ($0 ~ /repo: https:\/\//) { target=0; print; next }
     if ($0 ~ /^[[:space:]]+rev:/) {
-      if (target == 1) { print "    rev: " rev1; next }
-      if (target == 2) { print "    rev: " rev2; next }
+      if (target == 1) { print "    rev: " rev1; target=0; next }
+      if (target == 2) { print "    rev: " rev2; target=0; next }
+      target=0
     }
     print
   }
