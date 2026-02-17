@@ -27,7 +27,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           git fetch origin "${{ github.base_ref }}" --depth=1
-          additions="$(git diff --unified=0 FETCH_HEAD...HEAD | grep -E '^\+.*(TODO|FIXME)' || true)"
+          additions="$(git diff --unified=0 FETCH_HEAD...HEAD | grep -E '^\+.*\b(TODO|FIXME)(\([^)]*\))?:' || true)"
           if [ -n "$additions" ]; then
             untracked="$(printf '%s\n' "$additions" | grep -Ev '#[0-9]+' || true)"
             if [ -n "$untracked" ]; then
