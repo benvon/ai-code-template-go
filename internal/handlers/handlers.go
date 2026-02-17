@@ -1,3 +1,4 @@
+// Package handlers defines HTTP route registration and API responses.
 package handlers
 
 import (
@@ -29,7 +30,7 @@ func RegisterRoutes(mux *http.ServeMux) {
 	// API routes
 	mux.HandleFunc("/api/v1/hello", handleHello)
 	mux.HandleFunc("/api/v1/status", handleStatus)
-	
+
 	// Catch-all handler for undefined routes
 	mux.HandleFunc("/", handleNotFound)
 }
@@ -42,8 +43,8 @@ func handleHello(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := Response{
-		Success:   true,
-		Message:   "Hello from AI Code Template Go!",
+		Success: true,
+		Message: "Hello from AI Code Template Go!",
 		Data: map[string]interface{}{
 			"service": "ai-code-template-go",
 			"time":    time.Now().Format(time.RFC3339),
@@ -86,7 +87,7 @@ func handleNotFound(w http.ResponseWriter, r *http.Request) {
 func sendJSONResponse(w http.ResponseWriter, statusCode int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	
+
 	if err := json.NewEncoder(w).Encode(data); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}

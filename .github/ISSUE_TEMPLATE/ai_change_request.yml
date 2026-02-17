@@ -1,0 +1,53 @@
+name: AI Change Request
+description: Request a scoped change suitable for agentic implementation
+title: "[AI Change]: "
+labels: ["ai-change", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to request AI-assisted implementation with clear constraints and acceptance criteria.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem should be solved?
+      placeholder: Describe the outcome you need.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What is in scope and out of scope?
+      placeholder: "In scope: ... Out of scope: ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints and Guardrails
+      description: Technical, security, compliance, or product constraints.
+      placeholder: e.g. no new dependencies, maintain API compatibility.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: Concrete checks that define done.
+      placeholder: e.g. tests added, endpoint behavior, docs updated.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      options:
+        - label: I provided enough detail for implementation without guessing product intent.
+          required: true

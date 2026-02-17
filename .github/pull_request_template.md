@@ -1,52 +1,46 @@
 ## Description
 
-Please include a summary of the changes and the related issue. Include relevant motivation and context. List any dependencies that are required for this change.
+Please include a summary of the changes and related issue. Include motivation and context.
 
 Fixes # (issue)
 
 ## Type of change
 
-Please delete options that are not relevant.
-
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
 - [ ] Documentation update
 - [ ] Performance improvement
 - [ ] Code refactoring
 - [ ] Test improvement
 
-## How Has This Been Tested?
+## AI Disclosure
 
-Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce. Please also list any relevant details for your test configuration.
+- AI used?: <!-- yes/no; tools used -->
+- Human-verified tests run: <!-- exact commands -->
+- Security-sensitive areas touched: <!-- auth, crypto, secrets, data access, infra, or none -->
+
+## How Has This Been Tested?
 
 - [ ] Unit tests
 - [ ] Integration tests
 - [ ] Manual testing
 
 **Test Configuration**:
-* Go version:
-* OS:
-* Platform:
+- Go version:
+- OS:
+- Platform:
 
-## Checklist:
+## Checklist
 
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
-- [ ] Any dependent changes have been merged and published in downstream modules
-- [ ] I have run `go mod tidy` and `go mod vendor` if applicable
-- [ ] I have run `golangci-lint run` and fixed any issues
-- [ ] I have updated the changelog (if applicable)
-
-## Screenshots (if applicable)
-
-Add screenshots to help explain your changes.
+- [ ] I have performed a self-review
+- [ ] I updated documentation where needed
+- [ ] I added/updated tests for changed behavior
+- [ ] `go test ./...` passes locally
+- [ ] `golangci-lint run` passes locally
+- [ ] `make maintenance-validate` passes locally
+- [ ] I ran `go mod tidy` and committed module changes
 
 ## Additional Notes
 
-Add any other notes about the pull request here.
+Add any additional notes here.

@@ -37,7 +37,7 @@ By participating in this project, you agree to abide by our Code of Conduct. Ple
 
 ### Prerequisites
 
-- Go 1.21 or later
+- Go 1.25 or later
 - Git
 - golangci-lint (for linting)
 - GoReleaser (for testing releases)
@@ -57,6 +57,10 @@ go test ./...
 
 # Run linter
 golangci-lint run
+
+# Run guardrails and maintenance checks
+make maintenance-validate
+./scripts/check_guardrails.sh
 
 # Build locally
 go build -o ./bin/app ./

@@ -1,3 +1,4 @@
+// Package main provides the CLI entrypoint for version and startup output.
 package main
 
 import (

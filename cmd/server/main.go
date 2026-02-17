@@ -1,3 +1,4 @@
+// Package main starts the HTTP server entrypoint.
 package main
 
 import (
@@ -36,7 +37,7 @@ func main() {
 	handlers.RegisterRoutes(mux)
 
 	// Add health check endpoint
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, err := fmt.Fprintf(w, `{"status":"healthy","version":"%s","timestamp":"%s"}`, version, time.Now().Format(time.RFC3339))
@@ -46,7 +47,7 @@ func main() {
 	})
 
 	// Add version endpoint
-	mux.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/version", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, err := fmt.Fprintf(w, `{"version":"%s","commit":"%s","date":"%s","builtBy":"%s"}`, version, commit, date, builtBy)
@@ -81,11 +82,13 @@ func main() {
 
 	// Create a deadline for server shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
 
 	// Attempt graceful shutdown
-	if err := server.Shutdown(ctx); err != nil {
-		log.Fatalf("Server forced to shutdown: %v", err)
+	err = server.Shutdown(ctx)
+	cancel()
+	if err != nil {
+		log.Printf("Server forced to shutdown: %v", err)
+		os.Exit(1)
 	}
 
 	log.Println("Server exited")

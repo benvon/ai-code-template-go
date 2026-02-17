@@ -1,0 +1,54 @@
+name: Guardrails
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  guardrails:
+    name: Policy Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Run guardrail checks
+        run: ./scripts/check_guardrails.sh
+
+      - name: Check TODO/FIXME additions are issue-linked
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          additions="$(git diff --unified=0 FETCH_HEAD...HEAD | grep -E '^\+.*(TODO|FIXME)' || true)"
+          if [ -n "$additions" ]; then
+            untracked="$(printf '%s\n' "$additions" | grep -Ev '#[0-9]+' || true)"
+            if [ -n "$untracked" ]; then
+              echo "Found TODO/FIXME additions without issue references:" >&2
+              printf '%s\n' "$untracked" >&2
+              exit 1
+            fi
+          fi
+
+      - name: Check PR AI disclosure
+        if: github.event_name == 'pull_request'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          missing=0
+          for marker in "AI used?" "Human-verified tests run" "Security-sensitive areas touched"; do
+            if ! printf '%s' "$PR_BODY" | grep -Fq "$marker"; then
+              echo "PR body missing required section: $marker" >&2
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
