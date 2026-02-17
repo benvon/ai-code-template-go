@@ -15,7 +15,7 @@ echo -e "${GREEN}Setting up AI Code Template Go development environment...${NC}"
 
 # Check if Go is installed
 if ! command -v go &> /dev/null; then
-    echo -e "${RED}Error: Go is not installed. Please install Go 1.23 or later.${NC}"
+    echo -e "${RED}Error: Go is not installed. Please install Go 1.25 or later.${NC}"
     echo -e "${YELLOW}Visit: https://golang.org/doc/install${NC}"
     exit 1
 fi
@@ -30,7 +30,7 @@ echo -e "${YELLOW}Checking required development tools...${NC}"
 # Install golangci-lint if not present
 if ! command -v golangci-lint &> /dev/null; then
     echo -e "${YELLOW}Installing golangci-lint...${NC}"
-    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
+    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.8.0
 else
     echo -e "${GREEN}golangci-lint is already installed${NC}"
 fi
@@ -38,7 +38,7 @@ fi
 # Install govulncheck if not present
 if ! command -v govulncheck &> /dev/null; then
     echo -e "${YELLOW}Installing govulncheck...${NC}"
-    go install golang.org/x/vuln/cmd/govulncheck@latest
+    go install golang.org/x/vuln/cmd/govulncheck@v1.1.4
 else
     echo -e "${GREEN}govulncheck is already installed${NC}"
 fi
@@ -46,7 +46,7 @@ fi
 # Install gosec if not present
 if ! command -v gosec &> /dev/null; then
     echo -e "${YELLOW}Installing gosec...${NC}"
-    go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
+    go install github.com/securego/gosec/v2/cmd/gosec@v2.22.11
 else
     echo -e "${GREEN}gosec is already installed${NC}"
 fi

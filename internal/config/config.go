@@ -1,3 +1,4 @@
+// Package config loads and formats runtime application configuration.
 package config
 
 import (
@@ -56,10 +57,10 @@ type LoggingConfig struct {
 
 // SecurityConfig holds security-specific configuration
 type SecurityConfig struct {
-	JWTSecret    string
-	JWTExpiry    time.Duration
-	BCryptCost   int
-	APIKey       string
+	JWTSecret  string
+	JWTExpiry  time.Duration
+	BCryptCost int
+	APIKey     string
 }
 
 // Load loads configuration from environment variables

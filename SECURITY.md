@@ -2,84 +2,50 @@
 
 ## Supported Versions
 
-We provide security updates for the following versions:
-
-| Version | Supported          |
-| ------- | ------------------ |
-| latest  | :white_check_mark: |
-| < 1.0   | :x:                |
+| Version | Supported |
+| ------- | --------- |
+| main    | ✅ |
+| latest release tag | ✅ |
+| older releases | ❌ |
 
 ## Reporting a Vulnerability
 
-We take security vulnerabilities seriously. If you discover a security vulnerability, please follow these steps:
+Do not open public issues for vulnerabilities.
 
-### For Critical Security Issues
+Use one of these private channels:
 
-1. **Do NOT create a public GitHub issue**
-2. Send an email to security@example.com with:
-   - A detailed description of the vulnerability
-   - Steps to reproduce the issue
-   - Potential impact assessment
-   - Any suggested fixes (if available)
+1. GitHub Security Advisory (preferred): `Security` tab -> `Report a vulnerability`
+2. Maintainer security contact defined by your fork/organization
 
-### For Non-Critical Security Issues
+If you are adopting this template, replace this section with your real security contact and SLA.
 
-1. Create a private security advisory through GitHub:
-   - Go to the "Security" tab in this repository
-   - Click "Report a vulnerability"
-   - Fill out the advisory form
+## Response Expectations
 
-### What to Expect
+- Initial acknowledgement: within 2 business days
+- Triage and severity assignment: within 7 calendar days
+- Critical fix target: within 30 calendar days
 
-- **Initial Response**: We will acknowledge receipt within 48 hours
-- **Assessment**: We will assess the vulnerability within 7 days
-- **Updates**: We will provide regular updates every 7 days until resolution
-- **Resolution**: We aim to resolve critical vulnerabilities within 30 days
+## Automated Security Controls
 
-### Responsible Disclosure
+This template includes:
 
-We follow responsible disclosure practices:
-- We will work with you to understand and resolve the issue
-- We will acknowledge your contribution in our security advisories (if desired)
-- We ask that you do not publicly disclose the vulnerability until we have had a chance to address it
+- Dependabot (`.github/dependabot.yml`)
+- Dependency Review workflow (`.github/workflows/dependency-review.yml`)
+- govulncheck in CI (`.github/workflows/ci.yml`)
+- CodeQL analysis (`.github/workflows/codeql.yml`)
 
-## Security Best Practices for Contributors
+Blocking checks by default:
 
-When contributing to this project:
+- Dependency Review (high severity)
+- govulncheck job
 
-1. **Dependencies**: Keep dependencies up to date and review security advisories
-2. **Input Validation**: Always validate user inputs
-3. **Error Handling**: Don't expose sensitive information in error messages
-4. **Logging**: Be careful not to log sensitive data
-5. **Authentication**: Follow secure authentication practices
-6. **Permissions**: Use the principle of least privilege
+Advisory checks by default:
 
-## Security Tools and Processes
+- Additional static analysis or security scans you may add locally
 
-This project uses several automated security tools:
+## Secure Contribution Guidance
 
-- **Dependabot**: Automatically updates dependencies with known vulnerabilities
-- **CodeQL**: Static analysis for security vulnerabilities
-- **Gosec**: Go-specific security analyzer
-- **govulncheck**: Go vulnerability checker
-
-These tools run automatically on pull requests and can be found in our GitHub Actions workflows.
-
-## Security-Related Dependencies
-
-This project aims to minimize dependencies and regularly audits them for security issues. Key security considerations:
-
-- We use only well-maintained, popular Go modules
-- Dependencies are pinned to specific versions
-- Regular security audits are performed
-- Automated dependency updates are enabled through Dependabot
-
-## Incident Response
-
-In case of a security incident:
-
-1. The issue will be immediately triaged by project maintainers
-2. A fix will be developed and tested
-3. A security advisory will be published
-4. Affected users will be notified through GitHub releases and security advisories
-5. A post-incident review will be conducted to improve our security posture
+- Validate all input and handle errors safely.
+- Avoid logging secrets, tokens, and personal data.
+- Keep dependencies pinned and reviewed.
+- Prefer least-privilege permissions in GitHub workflows.

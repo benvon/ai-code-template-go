@@ -7,7 +7,7 @@ A template repo that's useful for Go code to be built with the help of agentic A
 - ✅ Comprehensive CI/CD pipeline with GitHub Actions
 - ✅ Automated releases with GoReleaser
 - ✅ Cross-platform builds (Linux, macOS, Windows on amd64 and arm64)
-- ✅ Security scanning with Gosec and govulncheck
+- ✅ Security scanning with CodeQL, Dependency Review, and govulncheck
 - ✅ Code quality checks with golangci-lint
 - ✅ Dependency management with Dependabot
 - ✅ Test coverage reporting
@@ -17,7 +17,7 @@ A template repo that's useful for Go code to be built with the help of agentic A
 - ✅ VS Code configuration for Go development
 - ✅ Comprehensive project structure examples
 - ✅ Environment configuration management
-- ✅ Setup automation scripts
+- ✅ Setup and template initialization scripts
 - ✅ API documentation and examples
 
 ## Getting Started
@@ -27,9 +27,9 @@ A template repo that's useful for Go code to be built with the help of agentic A
    # Clone this template
    git clone https://github.com/benvon/ai-code-template-go.git your-project-name
    cd your-project-name
-   
-   # Update go.mod with your module path
-   go mod edit -module github.com/your-username/your-project-name
+
+   # Initialize module path and project naming
+   make init-template MODULE_PATH=github.com/your-username/your-project-name PROJECT_NAME=your-project-name
    ```
 
 2. **Install dependencies**:
@@ -109,6 +109,9 @@ This displays:
 - `.goreleaser.yml` - GoReleaser configuration for builds and releases
 - `.github/workflows/ci.yml` - CI pipeline (tests, linting, security)
 - `.github/workflows/release.yml` - Release pipeline
+- `.github/workflows/codeql.yml` - CodeQL static analysis
+- `.github/workflows/dependency-review.yml` - Dependency risk checks on PRs
+- `.github/workflows/guardrails.yml` - AI and policy guardrails
 - `.golangci.yml` - Linter configuration
 - `.github/dependabot.yml` - Dependency update configuration
 - `Dockerfile` - Multi-stage Docker build configuration
@@ -117,6 +120,8 @@ This displays:
 - `.vscode/settings.json` - VS Code Go development settings
 - `.vscode/extensions.json` - Recommended VS Code extensions
 - `.env.example` - Environment variables template
+- `maintenance/versions.yaml` - Single source of truth for pinned template versions
+- `docs/TEMPLATE_MAINTENANCE.md` - Template maintenance and automation guide
 
 ## Development
 
@@ -170,6 +175,19 @@ pre-commit install
 # Run manually
 pre-commit run --all-files
 ```
+
+### Template Maintenance
+
+Use manifest-driven maintenance commands to keep pinned versions consistent:
+
+```bash
+make maintenance-update
+make maintenance-validate
+make maintenance-tests
+```
+
+See `docs/TEMPLATE_MAINTENANCE.md` for weekly automation behavior, rollback guidance, and troubleshooting.
+See `docs/TEMPLATE_ADOPTION.md` for branch protection and rollout checks.
 
 ### VS Code Integration
 

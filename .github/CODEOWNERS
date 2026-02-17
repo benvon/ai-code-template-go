@@ -14,14 +14,18 @@
 
 # Go source code
 *.go    @benvon
-go.mod  @benvon
-go.sum  @benvon
 
 # CI/CD and configuration files
 /.github/           @benvon
 /.goreleaser.yml    @benvon
 /.golangci.yml      @benvon
 /Dockerfile         @benvon
+/maintenance/       @benvon
+/scripts/maintenance/ @benvon
+/Makefile           @benvon
+/go.mod             @benvon
+/go.sum             @benvon
+/.tool-versions     @benvon
 
 # Documentation
 *.md                @benvon

@@ -1,6 +1,6 @@
 # This makefile provides targets that mirror the CI pipeline and help with development
 
-.PHONY: help test lint security vulnerability-check build clean setup deps verify mod-tidy-check all ci-local clean-template
+.PHONY: help test lint lint-config-check security vulnerability-check build clean setup deps verify mod-tidy-check coverage-check all ci-local clean-template init-template maintenance-update maintenance-validate maintenance-dry-run maintenance-tests update-tool-versions
 
 # =============================================================================
 # Configuration
@@ -10,6 +10,7 @@ REQUIRED_GO_VERSION := $(shell awk '/^go[[:space:]]+/ {print $$2; exit}' go.mod)
 BINARY_NAME := $(shell git rev-parse --show-toplevel | xargs basename)
 BUILD_DIR := ./bin
 GOVULNCHECK_VERSION ?= 1.1.4
+COVERAGE_THRESHOLD ?= 80.0
 
 # Colors for output
 GREEN := \033[32m
@@ -44,21 +45,26 @@ help:
 	@echo "    setup              - Install required tools and dependencies via asdf"
 	@echo "    deps               - Download and verify Go dependencies"
 	@echo "    clean              - Remove build artifacts"
-	@echo "    clean-template     - Clean up template code to prepare for new project"
+	@echo "    init-template      - Initialize module path and project naming safely"
+	@echo "    clean-template     - Deprecated alias (fails with guidance)"
 	@echo ""
 	@echo "  $(GREEN)Tool management targets:$(NC)"
-	@echo "    update-tool-versions - Update .tool-versions with latest versions"
-	@echo "    pin-tool-version   - Pin a specific tool version"
-	@echo "    unpin-tool-version - Unpin a specific tool version"
+	@echo "    maintenance-update  - Refresh maintenance manifest and sync all pinned versions"
+	@echo "    maintenance-validate- Validate template drift and prevent unpinned latest usage"
+	@echo "    maintenance-dry-run - Show pending maintenance changes without editing files"
+	@echo "    maintenance-tests   - Run maintenance script test suite"
+	@echo "    update-tool-versions - Backwards-compatible alias for maintenance-update"
 	@echo "    verify-tools       - Verify all development tools are working"
 	@echo ""
 	@echo "  $(GREEN)Testing targets (mirror CI):$(NC)"
 	@echo "    test               - Run all tests with race detection and coverage"
 	@echo "    lint               - Run golangci-lint"
+	@echo "    lint-config-check  - Verify golangci-lint configuration schema"
 	@echo "    security           - Run Gosec security scanner"
 	@echo "    vulnerability-check- Run govulncheck for vulnerability scanning"
 	@echo "    build              - Build binaries for multiple platforms"
 	@echo "    mod-tidy-check     - Check if go mod tidy is needed"
+	@echo "    coverage-check     - Enforce minimum test coverage threshold"
 	@echo ""
 	@echo "  $(GREEN)Docker targets:$(NC)"
 	@echo "    docker-build       - Build Docker image"
@@ -164,69 +170,40 @@ verify-tools:
 	@echo "gosec version: $$(gosec -version 2>/dev/null || echo 'gosec not available')"
 	$(call print_success,Tool verification completed!)
 
-## update-tool-versions: Update .tool-versions with latest versions (respects pinned versions)
-update-tool-versions:
-	$(call print_info,Updating .tool-versions with latest versions...)
-	@if [ ! -f .tool-versions ]; then \
-		$(call print_error,Error: .tool-versions file not found); \
-		exit 1; \
-	fi
-	@cp .tool-versions .tool-versions.backup
-	@while IFS= read -r line; do \
-		if echo "$$line" | grep -q "#pinned"; then \
-			echo "$$line" >> .tool-versions.tmp; \
-			echo "$(YELLOW)Keeping pinned: $$line$(NC)"; \
-		else \
-			tool=$$(echo "$$line" | awk '{print $$1}'); \
-			if [ -n "$$tool" ] && [ "$$tool" != "#" ]; then \
-				latest=$$(asdf latest "$$tool" 2>/dev/null || echo "unknown"); \
-				if [ "$$latest" != "unknown" ] && ! echo "$$latest" | grep -q "unable to load\|does not have\|unknown"; then \
-					echo "$$tool $$latest" >> .tool-versions.tmp; \
-					echo "$(GREEN)Updated $$tool to $$latest$(NC)"; \
-				else \
-					echo "$$line" >> .tool-versions.tmp; \
-					echo "$(YELLOW)Keeping $$line (no update available)$(NC)"; \
-				fi; \
-			else \
-				echo "$$line" >> .tool-versions.tmp; \
-			fi; \
-		fi; \
-	done < .tool-versions
-	@mv .tool-versions.tmp .tool-versions
-	$(call print_success,Updated .tool-versions successfully!)
-	$(call print_info,Run 'asdf install' to install updated versions)
+## maintenance-update: Discover and sync pinned versions from maintenance manifest
+maintenance-update:
+	$(call print_info,Updating maintenance manifest and syncing files...)
+	./scripts/maintenance/update_versions.sh --discover-latest
+	$(call print_success,Maintenance update completed!)
 
-## pin-tool-version: Pin a specific tool version (usage: make pin-tool-version TOOL=golangci-lint VERSION=2.3.0)
-pin-tool-version:
-	@if [ -z "$(TOOL)" ] || [ -z "$(VERSION)" ]; then \
-		$(call print_error,Error: Usage: make pin-tool-version TOOL=toolname VERSION=version); \
-		$(call print_info,Example: make pin-tool-version TOOL=golangci-lint VERSION=2.3.0); \
-		exit 1; \
-	fi
-	$(call print_info,Pinning $(TOOL) to version $(VERSION)...)
-	@if [ ! -f .tool-versions ]; then \
-		$(call print_error,Error: .tool-versions file not found); \
-		exit 1; \
-	fi
-	@sed -i.bak "s/^$(TOOL) .*/$(TOOL) $(VERSION) #pinned/" .tool-versions
-	@rm -f .tool-versions.bak
-	$(call print_success,Pinned $(TOOL) to $(VERSION))
+## maintenance-validate: Validate manifest drift and forbidden latest pins
+maintenance-validate:
+	$(call print_info,Validating maintenance drift...)
+	./scripts/maintenance/validate.sh
+	$(call print_success,Maintenance validation completed!)
 
-## unpin-tool-version: Unpin a specific tool version (usage: make unpin-tool-version TOOL=golangci-lint)
-unpin-tool-version:
-	@if [ -z "$(TOOL)" ]; then \
-		$(call print_error,Error: Usage: make unpin-tool-version TOOL=toolname); \
-		$(call print_info,Example: make unpin-tool-version TOOL=golangci-lint); \
-		exit 1; \
-	fi
-	$(call print_info,Unpinning $(TOOL)...)
-	@if [ ! -f .tool-versions ]; then \
-		$(call print_error,Error: .tool-versions file not found); \
-		exit 1; \
-	fi
-	@sed -i.bak "s/^$(TOOL) .* #pinned/$(TOOL) $$(asdf latest $(TOOL) 2>/dev/null || echo 'unknown')/" .tool-versions
-	@rm -f .tool-versions.bak
-	$(call print_success,Unpinned $(TOOL))
+## maintenance-dry-run: Show pending changes from manifest synchronization
+maintenance-dry-run:
+	$(call print_info,Running maintenance sync dry run...)
+	@tmp_dir=$$(mktemp -d); \
+	cp -R . "$$tmp_dir/repo"; \
+	cd "$$tmp_dir/repo"; \
+	./scripts/maintenance/sync_files.sh >/dev/null; \
+	echo; \
+	echo "Pending maintenance changes:"; \
+	git --no-pager diff -- maintenance/versions.yaml .tool-versions .pre-commit-config.yaml go.mod .github/workflows scripts/setup.sh Makefile || true; \
+	rm -rf "$$tmp_dir"
+
+## maintenance-tests: Run maintenance script tests
+maintenance-tests:
+	$(call print_info,Running maintenance tests...)
+	./scripts/maintenance/validate_test.sh
+	./scripts/maintenance/idempotency_test.sh
+	./scripts/maintenance/update_versions_test.sh
+	$(call print_success,Maintenance tests completed!)
+
+## update-tool-versions: Backwards-compatible alias for maintenance-update
+update-tool-versions: maintenance-update
 
 # =============================================================================
 # Testing and Quality Checks
@@ -241,10 +218,16 @@ test:
 	go tool cover -func=coverage.out
 
 ## lint: Run golangci-lint
-lint: check-golangci-lint-version
+lint: check-golangci-lint-version lint-config-check
 	$(call print_info,Running linter...)
 	golangci-lint run --timeout=10m
 	$(call print_success,Linting completed!)
+
+## lint-config-check: Verify golangci-lint configuration schema
+lint-config-check:
+	$(call print_info,Verifying golangci-lint config schema...)
+	golangci-lint config verify
+	$(call print_success,golangci-lint config schema check passed!)
 
 ## check-golangci-lint-version: Verify golangci-lint version is correct
 check-golangci-lint-version:
@@ -368,97 +351,20 @@ clean:
 	rm -f results.sarif
 	$(call print_success,Clean completed!)
 
-## clean-template: Clean up template code and prepare for new project development
+## init-template: Safely initialize this template for a new project
+init-template:
+	@if [ -z "$(MODULE_PATH)" ] || [ -z "$(PROJECT_NAME)" ]; then \
+		$(call print_error,Usage: make init-template MODULE_PATH=github.com/org/project PROJECT_NAME=project); \
+		exit 1; \
+	fi
+	$(call print_info,Initializing template for $(PROJECT_NAME)...)
+	./scripts/init_template.sh "$(MODULE_PATH)" "$(PROJECT_NAME)"
+	$(call print_success,Template initialization completed!)
+
+## clean-template: Deprecated alias for init-template
 clean-template:
-	$(call print_info,Cleaning up template code...)
-	$(call print_error,WARNING: This will modify your repository to remove template-specific code.)
-	$(call print_info,This action will:)
-	@echo "  - Update README.md to remove template-specific content"
-	@echo "  - Replace main.go with a minimal starter"
-	@echo "  - Update go.mod module path"
-	@echo "  - Remove AGENTS.md"
-	@echo "  - Remove this target from Makefile"
-	@echo ""
-	@read -p "Enter your new module path (e.g., github.com/username/project-name): " module_path && \
-	read -p "Enter your project name: " project_name && \
-	$(call print_info,Updating module path to $$module_path...) && \
-	go mod edit -module $$module_path && \
-	$(call print_info,Creating minimal main.go...) && \
-	cat > main.go << 'EOF' && \
-package main\
-\
-import (\
-	"fmt"\
-	"log"\
-)\
-\
-func main() {\
-	fmt.Println("Hello from $$project_name!")\
-	log.Println("Application started successfully")\
-}\
-EOF\
-	$(call print_info,Creating minimal main_test.go...) && \
-	cat > main_test.go << 'EOF' && \
-package main\
-\
-import "testing"\
-\
-func TestMain(t *testing.T) {\
-	// Add your tests here\
-	t.Log("Test suite ready")\
-}\
-EOF\
-	$(call print_info,Updating README.md...) && \
-	cat > README.md << 'EOF' && \
-# $$project_name\
-\
-A Go application built with AI assistance.\
-\
-## Getting Started\
-\
-```bash\
-# Install dependencies\
-go mod tidy\
-\
-# Run tests\
-make test\
-\
-# Build the application\
-make build\
-\
-# Run the application\
-go run main.go\
-```\
-\
-## Development\
-\
-This project includes a comprehensive development setup:\
-\
-- CI/CD with GitHub Actions\
-- Code quality checks with golangci-lint\
-- Security scanning with gosec and govulncheck\
-- Cross-platform builds with GoReleaser\
-- Automated dependency management\
-\
-Use `make help` to see all available commands.\
-\
-## Contributing\
-\
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.\
-EOF\
-	$(call print_info,Removing template-specific files...) && \
-	rm -f AGENTS.md && \
-	$(call print_info,Updating Makefile...) && \
-	sed -i '/## clean-template:/,/^$$/d' Makefile && \
-	sed -i 's/whats-flying-over-me/'"$$project_name"'/g' Makefile && \
-	$(call print_info,Running go mod tidy...) && \
-	go mod tidy && \
-	$(call print_success,Template cleanup completed!) && \
-	$(call print_info,Next steps:) && \
-	echo "  1. Review and commit the changes" && \
-	echo "  2. Update .goreleaser.yml with your project details" && \
-	echo "  3. Update CONTRIBUTING.md and other documentation" && \
-	echo "  4. Start building your application!"
+	$(call print_error,clean-template is deprecated. Use 'make init-template MODULE_PATH=... PROJECT_NAME=...' instead.)
+	@exit 1
 
 # =============================================================================
 # Release Management
@@ -639,8 +545,29 @@ next-rc-version:
 # Convenience Targets
 # =============================================================================
 
+## coverage-check: Enforce minimum coverage threshold from coverage.out
+coverage-check:
+	$(call print_info,Checking test coverage threshold ($(COVERAGE_THRESHOLD)% minimum, excluding entrypoints)...)
+	@awk -v min="$(COVERAGE_THRESHOLD)" '\
+		BEGIN { total = 0; covered = 0 } \
+		NR == 1 { next } \
+		{ \
+			split($$1, a, ":"); \
+			file = a[1]; \
+			if (file ~ /(^|\/)cmd\// || file ~ /(^|\/)main\.go$$/) { next } \
+			total += $$2; \
+			if ($$3 > 0) { covered += $$2 } \
+		} \
+		END { \
+			if (total == 0) { print "No coverage data available after exclusions"; exit 1 } \
+			pct = (covered / total) * 100; \
+			if (pct < min) { printf("Coverage %.1f%% is below required %.1f%%\n", pct, min); exit 1 } \
+			printf("Coverage %.1f%% meets required %.1f%%\n", pct, min); \
+		}' coverage.out
+	$(call print_success,Coverage threshold check passed!)
+
 ## all: Run all quality checks
-all: deps test lint security vulnerability-check mod-tidy-check
+all: deps test coverage-check lint security vulnerability-check mod-tidy-check
 	$(call print_success,All quality checks passed!)
 
 ## ci-local: Run the same checks as CI pipeline

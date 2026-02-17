@@ -1,0 +1,31 @@
+go:
+  language: "1.25"
+  toolchain: "1.25.5"
+
+tools:
+  golangci_lint: "2.8.0"
+  gosec: "2.22.11"
+  govulncheck: "1.1.4"
+  goimports: "0.40.0"
+  pre_commit: "4.5.1"
+
+github_actions:
+  actions_checkout: "v6"
+  actions_setup_go: "v6"
+  actions_cache: "v5"
+  codecov_action: "v5"
+  golangci_lint_action: "v9"
+  goreleaser_action: "v6"
+  docker_setup_buildx_action: "v3"
+  docker_login_action: "v3"
+  peter_evans_create_pull_request: "v7"
+  github_codeql_action: "v4"
+  dependency_review_action: "v4"
+
+pre_commit_hooks:
+  pre_commit_hooks: "v6.0.0"
+  pre_commit_golang: "v0.5.1"
+
+go_modules:
+  govulncheck_module: "v1.1.4"
+  gosec_module: "v2.22.11"
