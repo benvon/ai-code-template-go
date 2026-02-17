@@ -545,16 +545,6 @@ next-rc-version:
 # Convenience Targets
 # =============================================================================
 
-## all: Run all quality checks
-all: deps test coverage-check lint security vulnerability-check mod-tidy-check
-	$(call print_success,All quality checks passed!)
-
-## ci-local: Run the same checks as CI pipeline
-ci-local: all build
-	$(call print_success,Local CI pipeline completed successfully!)
-
-# Default target
-.DEFAULT_GOAL := help
 ## coverage-check: Enforce minimum coverage threshold from coverage.out
 coverage-check:
 	$(call print_info,Checking test coverage threshold ($(COVERAGE_THRESHOLD)% minimum, excluding entrypoints)...)
@@ -575,3 +565,14 @@ coverage-check:
 			printf("Coverage %.1f%% meets required %.1f%%\n", pct, min); \
 		}' coverage.out
 	$(call print_success,Coverage threshold check passed!)
+
+## all: Run all quality checks
+all: deps test coverage-check lint security vulnerability-check mod-tidy-check
+	$(call print_success,All quality checks passed!)
+
+## ci-local: Run the same checks as CI pipeline
+ci-local: all build
+	$(call print_success,Local CI pipeline completed successfully!)
+
+# Default target
+.DEFAULT_GOAL := help

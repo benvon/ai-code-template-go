@@ -11,21 +11,30 @@ fi
 MODULE_PATH="$1"
 PROJECT_NAME="$2"
 
+# Validate PROJECT_NAME contains only safe characters (alphanumeric, hyphen, underscore, dot)
+if ! [[ "${PROJECT_NAME}" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+  echo "Error: PROJECT_NAME must contain only alphanumeric characters, hyphens, underscores, and dots" >&2
+  exit 1
+fi
+
 echo "Initializing template for ${PROJECT_NAME} (${MODULE_PATH})"
 
 go mod edit -module "${MODULE_PATH}"
 
 if [ -f README.md ]; then
-  sed -i.bak "s/ai-code-template-go/${PROJECT_NAME}/g" README.md
-  rm -f README.md.bak
+  # Use sed with properly escaped replacement string
+  # Create a temporary file and use basic string replacement
+  awk -v old="ai-code-template-go" -v new="${PROJECT_NAME}" '{gsub(old, new); print}' README.md > README.md.tmp
+  mv README.md.tmp README.md
 fi
 
 if [ -f .env.example ]; then
   if ! grep -q '^APP_NAME=' .env.example; then
     echo "APP_NAME=${PROJECT_NAME}" >> .env.example
   else
-    sed -i.bak "s/^APP_NAME=.*/APP_NAME=${PROJECT_NAME}/" .env.example
-    rm -f .env.example.bak
+    # Use awk for safe replacement
+    awk -v new="${PROJECT_NAME}" '/^APP_NAME=/ {print "APP_NAME=" new; next} {print}' .env.example > .env.example.tmp
+    mv .env.example.tmp .env.example
   fi
 fi
 
