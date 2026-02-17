@@ -28,7 +28,7 @@ By participating in this project, you agree to abide by our Code of Conduct. Ple
 3. Make your changes
 4. Add tests for your changes
 5. Run the test suite (`go test ./...`)
-6. Run linting (`golangci-lint run`)
+6. Run linting (`make lint`)
 7. Commit your changes (`git commit -m 'Add amazing feature'`)
 8. Push to your branch (`git push origin feature/amazing-feature`)
 9. Open a Pull Request using the PR template
@@ -56,7 +56,7 @@ go mod tidy
 go test ./...
 
 # Run linter
-golangci-lint run
+make lint
 
 # Run guardrails and maintenance checks
 make maintenance-validate
@@ -72,7 +72,7 @@ go build -o ./bin/app ./
 
 - Follow the [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
 - Use `gofmt` to format your code
-- Run `golangci-lint run` before submitting
+- Run `make lint` before submitting
 - Write meaningful commit messages
 
 ### Testing

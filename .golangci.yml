@@ -16,9 +16,9 @@ linters:
     - unused
     - gocritic
 
-linters-settings:
-  revive:
-    rules:
-      - name: var-naming
-      - name: exported
-      - name: package-comments
+  settings:
+    revive:
+      rules:
+        - name: var-naming
+        - name: exported
+        - name: package-comments

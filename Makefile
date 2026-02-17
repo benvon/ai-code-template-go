@@ -1,6 +1,6 @@
 # This makefile provides targets that mirror the CI pipeline and help with development
 
-.PHONY: help test lint security vulnerability-check build clean setup deps verify mod-tidy-check coverage-check all ci-local clean-template init-template maintenance-update maintenance-validate maintenance-dry-run maintenance-tests update-tool-versions
+.PHONY: help test lint lint-config-check security vulnerability-check build clean setup deps verify mod-tidy-check coverage-check all ci-local clean-template init-template maintenance-update maintenance-validate maintenance-dry-run maintenance-tests update-tool-versions
 
 # =============================================================================
 # Configuration
@@ -59,6 +59,7 @@ help:
 	@echo "  $(GREEN)Testing targets (mirror CI):$(NC)"
 	@echo "    test               - Run all tests with race detection and coverage"
 	@echo "    lint               - Run golangci-lint"
+	@echo "    lint-config-check  - Verify golangci-lint configuration schema"
 	@echo "    security           - Run Gosec security scanner"
 	@echo "    vulnerability-check- Run govulncheck for vulnerability scanning"
 	@echo "    build              - Build binaries for multiple platforms"
@@ -217,10 +218,16 @@ test:
 	go tool cover -func=coverage.out
 
 ## lint: Run golangci-lint
-lint: check-golangci-lint-version
+lint: check-golangci-lint-version lint-config-check
 	$(call print_info,Running linter...)
 	golangci-lint run --timeout=10m
 	$(call print_success,Linting completed!)
+
+## lint-config-check: Verify golangci-lint configuration schema
+lint-config-check:
+	$(call print_info,Verifying golangci-lint config schema...)
+	golangci-lint config verify
+	$(call print_success,golangci-lint config schema check passed!)
 
 ## check-golangci-lint-version: Verify golangci-lint version is correct
 check-golangci-lint-version:
