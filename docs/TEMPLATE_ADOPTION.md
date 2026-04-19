@@ -12,11 +12,8 @@ This checklist helps teams safely bootstrap a new repository from this template.
    - `make maintenance-validate`
    - `make ci-local`
 4. Set branch protections for `main` with required checks:
-   - `Test`
-   - `Lint`
-   - `Vulnerability Check`
-   - `Maintenance Validate`
-   - `Policy Checks`
+   - `quality / quality`
+   - `release-policy / release-policy`
 5. Configure security reporting contact in `SECURITY.md`.
 6. Enable GitHub features:
    - Dependabot

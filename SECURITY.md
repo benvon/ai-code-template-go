@@ -31,7 +31,7 @@ This template includes:
 
 - Dependabot (`.github/dependabot.yml`)
 - Dependency Review workflow (`.github/workflows/dependency-review.yml`)
-- govulncheck in CI (`.github/workflows/ci.yml`)
+- govulncheck in the shared quality workflow (`.github/workflows/quality.yml`)
 - CodeQL analysis (`.github/workflows/codeql.yml`)
 
 Blocking checks by default:

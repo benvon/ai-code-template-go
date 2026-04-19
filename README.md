@@ -49,7 +49,7 @@ A template repo that's useful for Go code to be built with the help of agentic A
 
 ## Release Process
 
-This project uses GoReleaser for automated releases. When you push a semantic version tag, it will:
+This project uses GoReleaser for automated releases. When you push a supported semantic version tag, it will:
 
 1. Build binaries for multiple platforms (Linux, macOS, Windows on amd64 and arm64)
 2. Create GitHub releases with changelogs
@@ -107,7 +107,8 @@ This displays:
 ## Configuration Files
 
 - `.goreleaser.yml` - GoReleaser configuration for builds and releases
-- `.github/workflows/ci.yml` - CI pipeline (tests, linting, security)
+- `.github/workflows/quality.yml` - Pull request and main-branch quality gate
+- `.github/workflows/release-policy.yml` - PR title validation and release label management
 - `.github/workflows/release.yml` - Release pipeline
 - `.github/workflows/codeql.yml` - CodeQL static analysis
 - `.github/workflows/dependency-review.yml` - Dependency risk checks on PRs
@@ -132,7 +133,7 @@ This project includes several CI checks:
 - **Builds**: Cross-platform build verification
 - **Dependencies**: Go mod tidy verification
 
-All checks must pass before merging to main.
+The normalized required checks for `main` are `quality / quality` and `release-policy / release-policy`.
 
 ### Project Structure
 
