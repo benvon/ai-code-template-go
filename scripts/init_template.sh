@@ -45,5 +45,5 @@ Next steps:
 1. Review README.md and AGENTS.md for project-specific policy.
 2. Run: go mod tidy
 3. Run: make ci-local
-4. Configure branch protections to require CI, Guardrails, and Maintenance Validate checks.
+4. Configure branch protections to require quality / quality and release-policy / release-policy.
 MSG

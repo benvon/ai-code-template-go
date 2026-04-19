@@ -69,21 +69,46 @@ expect_match "${ROOT}/.pre-commit-config.yaml" "rev:[[:space:]]+${PRE_COMMIT_GOL
 
 for file in "${ROOT}/.github/workflows"/*.yml; do
   [ -f "${file}" ] || continue
-  expect_match "${file}" "actions/checkout@${ACTIONS_CHECKOUT}" "checkout action version drift"
+
+  if grep -Eq "uses:[[:space:]]*actions/checkout@" "${file}"; then
+    expect_match "${file}" "actions/checkout@${ACTIONS_CHECKOUT}" "checkout action version drift (${file})"
+  fi
+  if grep -Eq "uses:[[:space:]]*actions/setup-go@" "${file}"; then
+    expect_match "${file}" "actions/setup-go@${ACTIONS_SETUP_GO}" "setup-go action version drift (${file})"
+  fi
+  if grep -Eq "uses:[[:space:]]*actions/cache@" "${file}"; then
+    expect_match "${file}" "actions/cache@${ACTIONS_CACHE}" "actions/cache version drift (${file})"
+  fi
+  if grep -Eq "uses:[[:space:]]*codecov/codecov-action@" "${file}"; then
+    expect_match "${file}" "codecov/codecov-action@${CODECOV_ACTION}" "codecov action version drift (${file})"
+  fi
+  if grep -Eq "uses:[[:space:]]*golangci/golangci-lint-action@" "${file}"; then
+    expect_match "${file}" "golangci/golangci-lint-action@${GOLANGCI_LINT_ACTION}" "golangci-lint action version drift (${file})"
+  fi
+  if grep -Eq "uses:[[:space:]]*goreleaser/goreleaser-action@" "${file}"; then
+    expect_match "${file}" "goreleaser/goreleaser-action@${GORELEASER_ACTION}" "goreleaser action version drift (${file})"
+  fi
+  if grep -Eq "uses:[[:space:]]*docker/setup-buildx-action@" "${file}"; then
+    expect_match "${file}" "docker/setup-buildx-action@${DOCKER_SETUP_BUILDX_ACTION}" "setup-buildx action version drift (${file})"
+  fi
+  if grep -Eq "uses:[[:space:]]*docker/login-action@" "${file}"; then
+    expect_match "${file}" "docker/login-action@${DOCKER_LOGIN_ACTION}" "docker login action version drift (${file})"
+  fi
+  if grep -Eq "uses:[[:space:]]*peter-evans/create-pull-request@" "${file}"; then
+    expect_match "${file}" "peter-evans/create-pull-request@${PETER_EVANS_CREATE_PULL_REQUEST}" "create-pull-request action version drift (${file})"
+  fi
+  if grep -Eq "uses:[[:space:]]*github/codeql-action/init@" "${file}"; then
+    expect_match "${file}" "github/codeql-action/init@${GITHUB_CODEQL_ACTION}" "codeql init action version drift (${file})"
+  fi
+  if grep -Eq "uses:[[:space:]]*github/codeql-action/analyze@" "${file}"; then
+    expect_match "${file}" "github/codeql-action/analyze@${GITHUB_CODEQL_ACTION}" "codeql analyze action version drift (${file})"
+  fi
+  if grep -Eq "uses:[[:space:]]*actions/dependency-review-action@" "${file}"; then
+    expect_match "${file}" "actions/dependency-review-action@${DEPENDENCY_REVIEW_ACTION}" "dependency review action version drift (${file})"
+  fi
+
   check_no_latest "${file}"
 done
-
-expect_match "${ROOT}/.github/workflows/ci.yml" "actions/setup-go@${ACTIONS_SETUP_GO}" "setup-go action version drift"
-expect_match "${ROOT}/.github/workflows/ci.yml" "actions/cache@${ACTIONS_CACHE}" "actions/cache version drift"
-expect_match "${ROOT}/.github/workflows/ci.yml" "codecov/codecov-action@${CODECOV_ACTION}" "codecov action version drift"
-expect_match "${ROOT}/.github/workflows/ci.yml" "golangci/golangci-lint-action@${GOLANGCI_LINT_ACTION}" "golangci-lint action version drift"
-expect_match "${ROOT}/.github/workflows/release.yml" "goreleaser/goreleaser-action@${GORELEASER_ACTION}" "goreleaser action version drift"
-expect_match "${ROOT}/.github/workflows/release.yml" "docker/setup-buildx-action@${DOCKER_SETUP_BUILDX_ACTION}" "setup-buildx action version drift"
-expect_match "${ROOT}/.github/workflows/release.yml" "docker/login-action@${DOCKER_LOGIN_ACTION}" "docker login action version drift"
-expect_match "${ROOT}/.github/workflows/template-maintenance.yml" "peter-evans/create-pull-request@${PETER_EVANS_CREATE_PULL_REQUEST}" "create-pull-request action version drift"
-expect_match "${ROOT}/.github/workflows/codeql.yml" "github/codeql-action/init@${GITHUB_CODEQL_ACTION}" "codeql init action version drift"
-expect_match "${ROOT}/.github/workflows/codeql.yml" "github/codeql-action/analyze@${GITHUB_CODEQL_ACTION}" "codeql analyze action version drift"
-expect_match "${ROOT}/.github/workflows/dependency-review.yml" "actions/dependency-review-action@${DEPENDENCY_REVIEW_ACTION}" "dependency review action version drift"
 
 expect_match "${ROOT}/scripts/setup.sh" "govulncheck@${GOVULNCHECK_MODULE}" "setup govulncheck module drift"
 expect_match "${ROOT}/scripts/setup.sh" "gosec@${GOSEC_MODULE}" "setup gosec module drift"

@@ -83,9 +83,6 @@ for file in "${ROOT}/.github/workflows"/*.yml; do
   perl -i -pe "s#^(\\s*uses:\\s*actions/dependency-review-action)\\@.*#\\1\\@${DEPENDENCY_REVIEW_ACTION}#" "${file}"
 done
 
-replace_line "${ROOT}/.github/workflows/ci.yml" '^[[:space:]]+version:[[:space:]]+latest$' "          version: v${GOLANGCI_LINT_VERSION}"
-perl -i -pe "s#^(\\s*run:\\s*)go install golang.org/x/vuln/cmd/govulncheck\\@.*#\\1go install golang.org/x/vuln/cmd/govulncheck\\@${GOVULNCHECK_MODULE}#" "${ROOT}/.github/workflows/ci.yml"
-
 replace_line "${SETUP_SCRIPT_FILE}" '^    go install golang.org/x/vuln/cmd/govulncheck@.*$' "    go install golang.org/x/vuln/cmd/govulncheck@${GOVULNCHECK_MODULE}"
 replace_line "${SETUP_SCRIPT_FILE}" '^    go install github.com/securego/gosec/v2/cmd/gosec@.*$' "    go install github.com/securego/gosec/v2/cmd/gosec@${GOSEC_MODULE}"
 replace_line "${SETUP_SCRIPT_FILE}" '^    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh \| sh -s -- -b .*\/bin .*$' "    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b \$(go env GOPATH)/bin v${GOLANGCI_LINT_VERSION}"
