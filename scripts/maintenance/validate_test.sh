@@ -17,8 +17,8 @@ cp -R "${ROOT}" "${TMP_DIR}/repo"
 # Drift check should fail.
 (
   cd "${TMP_DIR}/repo"
-  awk '{ if ($1 == "golangci-lint") { print "golangci-lint 0.0.1" } else { print } }' .tool-versions > .tool-versions.tmp
-  mv .tool-versions.tmp .tool-versions
+  awk '{ if ($1 == "github.com/golangci/golangci-lint/v2") { print "\tgithub.com/golangci/golangci-lint/v2 v0.0.1 // indirect" } else { print } }' tools/go.mod > tools/go.mod.tmp
+  mv tools/go.mod.tmp tools/go.mod
   if ./scripts/maintenance/validate.sh; then
     echo "expected validate.sh to fail with drift" >&2
     exit 1

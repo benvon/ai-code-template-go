@@ -46,7 +46,7 @@ jobs:
             echo "## Risk Summary"
             echo
             echo "### Tooling changes"
-            git diff -- .tool-versions maintenance/versions.yaml .pre-commit-config.yaml || true
+            git diff -- mise.toml tools/go.mod tools/go.sum maintenance/versions.yaml .pre-commit-config.yaml || true
             echo
             echo "### Workflow changes"
             git diff -- .github/workflows || true

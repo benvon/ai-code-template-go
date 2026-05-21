@@ -17,7 +17,6 @@ GOLANGCI_LINT_VERSION="$(yaml_get "${MANIFEST}" tools golangci_lint)"
 GOSEC_VERSION="$(yaml_get "${MANIFEST}" tools gosec)"
 GOVULNCHECK_VERSION="$(yaml_get "${MANIFEST}" tools govulncheck)"
 GOIMPORTS_VERSION="$(yaml_get "${MANIFEST}" tools goimports)"
-PRE_COMMIT_VERSION="$(yaml_get "${MANIFEST}" tools pre_commit)"
 
 ACTIONS_CHECKOUT="$(yaml_get "${MANIFEST}" github_actions actions_checkout)"
 ACTIONS_SETUP_GO="$(yaml_get "${MANIFEST}" github_actions actions_setup_go)"
@@ -34,23 +33,23 @@ DEPENDENCY_REVIEW_ACTION="$(yaml_get "${MANIFEST}" github_actions dependency_rev
 PRE_COMMIT_HOOKS_REV="$(yaml_get "${MANIFEST}" pre_commit_hooks pre_commit_hooks)"
 PRE_COMMIT_GOLANG_REV="$(yaml_get "${MANIFEST}" pre_commit_hooks pre_commit_golang)"
 
-GOVULNCHECK_MODULE="$(yaml_get "${MANIFEST}" go_modules govulncheck_module)"
-GOSEC_MODULE="$(yaml_get "${MANIFEST}" go_modules gosec_module)"
-
 GO_MOD_FILE="${ROOT}/go.mod"
-TOOL_VERSIONS_FILE="${ROOT}/.tool-versions"
+TOOLS_GO_MOD_FILE="${ROOT}/tools/go.mod"
+MISE_FILE="${ROOT}/mise.toml"
 PRE_COMMIT_FILE="${ROOT}/.pre-commit-config.yaml"
-MAKEFILE_FILE="${ROOT}/Makefile"
-SETUP_SCRIPT_FILE="${ROOT}/scripts/setup.sh"
 
-replace_line "${GO_MOD_FILE}" '^go[[:space:]]+[0-9]+\.[0-9]+(\.[0-9]+)?$' "go ${GO_LANGUAGE}"
+replace_line "${GO_MOD_FILE}" '^go[[:space:]]+[0-9]+[.][0-9]+([.][0-9]+)?$' "go ${GO_LANGUAGE}"
+replace_line "${GO_MOD_FILE}" '^toolchain[[:space:]]+go[0-9]+[.][0-9]+([.][0-9]+)?$' "toolchain go${GO_TOOLCHAIN}"
 
-replace_line "${TOOL_VERSIONS_FILE}" '^golang[[:space:]]+.*$' "golang ${GO_TOOLCHAIN}"
-replace_line "${TOOL_VERSIONS_FILE}" '^golangci-lint[[:space:]]+.*$' "golangci-lint ${GOLANGCI_LINT_VERSION}"
-replace_line "${TOOL_VERSIONS_FILE}" '^gosec[[:space:]]+.*$' "gosec ${GOSEC_VERSION}"
-replace_line "${TOOL_VERSIONS_FILE}" '^govulncheck[[:space:]]+.*$' "govulncheck ${GOVULNCHECK_VERSION}"
-replace_line "${TOOL_VERSIONS_FILE}" '^goimports[[:space:]]+.*$' "goimports ${GOIMPORTS_VERSION}"
-replace_line "${TOOL_VERSIONS_FILE}" '^pre-commit[[:space:]]+.*$' "pre-commit ${PRE_COMMIT_VERSION}"
+replace_line "${MISE_FILE}" '^go[[:space:]]*=.*$' "go = \"${GO_TOOLCHAIN}\""
+replace_line "${TOOLS_GO_MOD_FILE}" '^go[[:space:]]+[0-9]+[.][0-9]+([.][0-9]+)?$' "go ${GO_LANGUAGE}"
+replace_line "${TOOLS_GO_MOD_FILE}" '^toolchain[[:space:]]+go[0-9]+[.][0-9]+([.][0-9]+)?$' "toolchain go${GO_TOOLCHAIN}"
+if ! grep -Eq "github.com/golangci/golangci-lint/v2[[:space:]]+v${GOLANGCI_LINT_VERSION}" "${TOOLS_GO_MOD_FILE}" ||
+  ! grep -Eq "github.com/securego/gosec/v2[[:space:]]+v${GOSEC_VERSION}" "${TOOLS_GO_MOD_FILE}" ||
+  ! grep -Eq "golang.org/x/vuln[[:space:]]+v${GOVULNCHECK_VERSION}" "${TOOLS_GO_MOD_FILE}" ||
+  ! grep -Eq "golang.org/x/tools[[:space:]]+v${GOIMPORTS_VERSION}" "${TOOLS_GO_MOD_FILE}"; then
+  go get -modfile="${TOOLS_GO_MOD_FILE}" -tool "github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v${GOLANGCI_LINT_VERSION}" "github.com/securego/gosec/v2/cmd/gosec@v${GOSEC_VERSION}" "golang.org/x/vuln/cmd/govulncheck@v${GOVULNCHECK_VERSION}" "golang.org/x/tools/cmd/goimports@v${GOIMPORTS_VERSION}" >/dev/null
+fi
 
 awk -v rev1="${PRE_COMMIT_HOOKS_REV}" -v rev2="${PRE_COMMIT_GOLANG_REV}" '
   {
@@ -82,10 +81,5 @@ for file in "${ROOT}/.github/workflows"/*.yml; do
   perl -i -pe "s#^(\\s*uses:\\s*github/codeql-action/analyze)\\@.*#\\1\\@${GITHUB_CODEQL_ACTION}#" "${file}"
   perl -i -pe "s#^(\\s*uses:\\s*actions/dependency-review-action)\\@.*#\\1\\@${DEPENDENCY_REVIEW_ACTION}#" "${file}"
 done
-
-replace_line "${SETUP_SCRIPT_FILE}" '^    go install golang.org/x/vuln/cmd/govulncheck@.*$' "    go install golang.org/x/vuln/cmd/govulncheck@${GOVULNCHECK_MODULE}"
-replace_line "${SETUP_SCRIPT_FILE}" '^    go install github.com/securego/gosec/v2/cmd/gosec@.*$' "    go install github.com/securego/gosec/v2/cmd/gosec@${GOSEC_MODULE}"
-replace_line "${SETUP_SCRIPT_FILE}" '^    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh \| sh -s -- -b .*\/bin .*$' "    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b \$(go env GOPATH)/bin v${GOLANGCI_LINT_VERSION}"
-replace_line "${MAKEFILE_FILE}" '^GOVULNCHECK_VERSION \?= .*$' "GOVULNCHECK_VERSION ?= ${GOVULNCHECK_VERSION}"
 
 echo "Synchronized versions from ${MANIFEST}" >&2

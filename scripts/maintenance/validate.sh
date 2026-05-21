@@ -36,7 +36,6 @@ GOLANGCI_LINT_VERSION="$(yaml_get "${MANIFEST}" tools golangci_lint)"
 GOSEC_VERSION="$(yaml_get "${MANIFEST}" tools gosec)"
 GOVULNCHECK_VERSION="$(yaml_get "${MANIFEST}" tools govulncheck)"
 GOIMPORTS_VERSION="$(yaml_get "${MANIFEST}" tools goimports)"
-PRE_COMMIT_VERSION="$(yaml_get "${MANIFEST}" tools pre_commit)"
 
 ACTIONS_CHECKOUT="$(yaml_get "${MANIFEST}" github_actions actions_checkout)"
 ACTIONS_SETUP_GO="$(yaml_get "${MANIFEST}" github_actions actions_setup_go)"
@@ -53,16 +52,19 @@ DEPENDENCY_REVIEW_ACTION="$(yaml_get "${MANIFEST}" github_actions dependency_rev
 PRE_COMMIT_HOOKS_REV="$(yaml_get "${MANIFEST}" pre_commit_hooks pre_commit_hooks)"
 PRE_COMMIT_GOLANG_REV="$(yaml_get "${MANIFEST}" pre_commit_hooks pre_commit_golang)"
 
-GOVULNCHECK_MODULE="$(yaml_get "${MANIFEST}" go_modules govulncheck_module)"
-GOSEC_MODULE="$(yaml_get "${MANIFEST}" go_modules gosec_module)"
-
 expect_match "${ROOT}/go.mod" "^go[[:space:]]+${GO_LANGUAGE}$" "go.mod go directive drift"
-expect_match "${ROOT}/.tool-versions" "^golang[[:space:]]+${GO_TOOLCHAIN}$" ".tool-versions golang drift"
-expect_match "${ROOT}/.tool-versions" "^golangci-lint[[:space:]]+${GOLANGCI_LINT_VERSION}$" ".tool-versions golangci-lint drift"
-expect_match "${ROOT}/.tool-versions" "^gosec[[:space:]]+${GOSEC_VERSION}$" ".tool-versions gosec drift"
-expect_match "${ROOT}/.tool-versions" "^govulncheck[[:space:]]+${GOVULNCHECK_VERSION}$" ".tool-versions govulncheck drift"
-expect_match "${ROOT}/.tool-versions" "^goimports[[:space:]]+${GOIMPORTS_VERSION}$" ".tool-versions goimports drift"
-expect_match "${ROOT}/.tool-versions" "^pre-commit[[:space:]]+${PRE_COMMIT_VERSION}$" ".tool-versions pre-commit drift"
+expect_match "${ROOT}/go.mod" "^toolchain[[:space:]]+go${GO_TOOLCHAIN}$" "go.mod toolchain directive drift"
+expect_match "${ROOT}/mise.toml" "go[[:space:]]*=[[:space:]]*\"${GO_TOOLCHAIN}\"" "mise Go version drift"
+expect_match "${ROOT}/tools/go.mod" "^go[[:space:]]+${GO_LANGUAGE}$" "tools/go.mod go directive drift"
+expect_match "${ROOT}/tools/go.mod" "^toolchain[[:space:]]+go${GO_TOOLCHAIN}$" "tools/go.mod toolchain directive drift"
+expect_match "${ROOT}/tools/go.mod" "github.com/golangci/golangci-lint/v2[[:space:]]+v${GOLANGCI_LINT_VERSION}" "tools/go.mod golangci-lint drift"
+expect_match "${ROOT}/tools/go.mod" "github.com/securego/gosec/v2[[:space:]]+v${GOSEC_VERSION}" "tools/go.mod gosec drift"
+expect_match "${ROOT}/tools/go.mod" "golang.org/x/vuln[[:space:]]+v${GOVULNCHECK_VERSION}" "tools/go.mod govulncheck drift"
+expect_match "${ROOT}/tools/go.mod" "golang.org/x/tools[[:space:]]+v${GOIMPORTS_VERSION}" "tools/go.mod goimports drift"
+expect_match "${ROOT}/tools/go.mod" "github.com/golangci/golangci-lint/v2/cmd/golangci-lint" "tools/go.mod golangci-lint tool missing"
+expect_match "${ROOT}/tools/go.mod" "github.com/securego/gosec/v2/cmd/gosec" "tools/go.mod gosec tool missing"
+expect_match "${ROOT}/tools/go.mod" "golang.org/x/vuln/cmd/govulncheck" "tools/go.mod govulncheck tool missing"
+expect_match "${ROOT}/tools/go.mod" "golang.org/x/tools/cmd/goimports" "tools/go.mod goimports tool missing"
 
 expect_match "${ROOT}/.pre-commit-config.yaml" "rev:[[:space:]]+${PRE_COMMIT_HOOKS_REV}" "pre-commit-hooks rev drift"
 expect_match "${ROOT}/.pre-commit-config.yaml" "rev:[[:space:]]+${PRE_COMMIT_GOLANG_REV}" "pre-commit-golang rev drift"
@@ -110,12 +112,13 @@ for file in "${ROOT}/.github/workflows"/*.yml; do
   check_no_latest "${file}"
 done
 
-expect_match "${ROOT}/scripts/setup.sh" "govulncheck@${GOVULNCHECK_MODULE}" "setup govulncheck module drift"
-expect_match "${ROOT}/scripts/setup.sh" "gosec@${GOSEC_MODULE}" "setup gosec module drift"
-expect_match "${ROOT}/scripts/setup.sh" "golangci-lint/master/install.sh.*v${GOLANGCI_LINT_VERSION}" "setup golangci-lint installer drift"
-expect_match "${ROOT}/Makefile" "^GOVULNCHECK_VERSION \?= ${GOVULNCHECK_VERSION}$" "Makefile govulncheck version drift"
+expect_match "${ROOT}/scripts/setup.sh" "go tool -modfile=tools/go.mod golangci-lint" "setup golangci-lint go tool usage missing"
+expect_match "${ROOT}/scripts/setup.sh" "go tool -modfile=tools/go.mod govulncheck" "setup govulncheck go tool usage missing"
+expect_match "${ROOT}/scripts/setup.sh" "go tool -modfile=tools/go.mod gosec" "setup gosec go tool usage missing"
+expect_match "${ROOT}/Makefile" "^TOOLS_MODFILE := tools/go.mod$" "Makefile tools module drift"
 
 check_no_latest "${ROOT}/scripts/setup.sh"
+check_no_latest "${ROOT}/tools/go.mod"
 
 if [ "${failures}" -ne 0 ]; then
   echo "maintenance validation failed (${failures} issue(s))" >&2

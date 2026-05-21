@@ -11,10 +11,10 @@ cp -R "${ROOT}" "${TMP_DIR}/repo"
 (
   cd "${TMP_DIR}/repo"
   ./scripts/maintenance/sync_files.sh
-  first_hash="$(shasum go.mod .tool-versions .pre-commit-config.yaml .github/workflows/quality.yml .github/workflows/release.yml scripts/setup.sh Makefile | shasum | awk '{print $1}')"
+  first_hash="$(shasum go.mod mise.toml tools/go.mod tools/go.sum .pre-commit-config.yaml .github/workflows/quality.yml .github/workflows/release.yml scripts/setup.sh Makefile | shasum | awk '{print $1}')"
 
   ./scripts/maintenance/sync_files.sh
-  second_hash="$(shasum go.mod .tool-versions .pre-commit-config.yaml .github/workflows/quality.yml .github/workflows/release.yml scripts/setup.sh Makefile | shasum | awk '{print $1}')"
+  second_hash="$(shasum go.mod mise.toml tools/go.mod tools/go.sum .pre-commit-config.yaml .github/workflows/quality.yml .github/workflows/release.yml scripts/setup.sh Makefile | shasum | awk '{print $1}')"
 
   if [ "${first_hash}" != "${second_hash}" ]; then
     echo "sync_files.sh is not idempotent" >&2

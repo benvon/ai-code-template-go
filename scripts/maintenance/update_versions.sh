@@ -30,6 +30,11 @@ module_latest() {
   go list -m -f '{{.Version}}' "${module}@latest"
 }
 
+module_version_without_v() {
+  local module="$1"
+  module_latest "${module}" | sed 's/^v//'
+}
+
 discover_latest() {
   local value
 
@@ -39,11 +44,17 @@ discover_latest() {
   value="$(git_latest_tag https://github.com/dnephin/pre-commit-golang.git || true)"
   [ -n "${value}" ] && yaml_set "${MANIFEST}" pre_commit_hooks pre_commit_golang "${value}"
 
-  value="$(module_latest golang.org/x/vuln/cmd/govulncheck || true)"
-  [ -n "${value}" ] && yaml_set "${MANIFEST}" go_modules govulncheck_module "${value}"
+  value="$(module_version_without_v github.com/golangci/golangci-lint/v2 || true)"
+  [ -n "${value}" ] && yaml_set "${MANIFEST}" tools golangci_lint "${value}"
 
-  value="$(module_latest github.com/securego/gosec/v2/cmd/gosec || true)"
-  [ -n "${value}" ] && yaml_set "${MANIFEST}" go_modules gosec_module "${value}"
+  value="$(module_version_without_v github.com/securego/gosec/v2 || true)"
+  [ -n "${value}" ] && yaml_set "${MANIFEST}" tools gosec "${value}"
+
+  value="$(module_version_without_v golang.org/x/vuln || true)"
+  [ -n "${value}" ] && yaml_set "${MANIFEST}" tools govulncheck "${value}"
+
+  value="$(module_version_without_v golang.org/x/tools || true)"
+  [ -n "${value}" ] && yaml_set "${MANIFEST}" tools goimports "${value}"
 
   echo "Discovered latest versions for selected dependencies" >&2
 }

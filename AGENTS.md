@@ -11,7 +11,7 @@
 
 ## Code Style
 
-* Go version 1.23+ with the latest patch release.
+* Go version 1.26+ with the latest patch release.
 * Avoid complex embedded logic in a single function. Break complex functions down into smaller functions.
 * Use strong typing wherever possible.
 * Don't use the `interface{}` construct. Use `any` instead.
@@ -86,4 +86,4 @@
 * Include correlation IDs for request tracing
 * Log at appropriate levels (debug, info, warn, error)
 * Implement health checks and metrics
-* Use context for request cancellation and timeouts 
+* Use context for request cancellation and timeouts
