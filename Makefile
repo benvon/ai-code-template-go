@@ -7,10 +7,13 @@
 # =============================================================================
 
 REQUIRED_GO_VERSION := $(shell awk '/^go[[:space:]]+/ {print $$2; exit}' go.mod)
+TOOLS_MODFILE := tools/go.mod
 BINARY_NAME := $(shell git rev-parse --show-toplevel | xargs basename)
 BUILD_DIR := ./bin
-GOVULNCHECK_VERSION ?= 1.1.4
 COVERAGE_THRESHOLD ?= 80.0
+GOLANGCI_LINT := go tool -modfile=$(TOOLS_MODFILE) golangci-lint
+GOSEC := go tool -modfile=$(TOOLS_MODFILE) gosec
+GOVULNCHECK := go tool -modfile=$(TOOLS_MODFILE) govulncheck
 
 # Colors for output
 GREEN := \033[32m
@@ -42,7 +45,7 @@ endef
 help:
 	@echo "Available targets:"
 	@echo "  $(GREEN)Development targets:$(NC)"
-	@echo "    setup              - Install required tools and dependencies via asdf"
+	@echo "    setup              - Download dependencies and warm pinned Go tools"
 	@echo "    deps               - Download and verify Go dependencies"
 	@echo "    clean              - Remove build artifacts"
 	@echo "    init-template      - Initialize module path and project naming safely"
@@ -97,19 +100,13 @@ help:
 # Development Setup
 # =============================================================================
 
-## setup: Install required development tools via asdf
+## setup: Download dependencies and warm pinned Go tools
 setup: check-go-version
-	$(call print_info,Installing development tools via asdf...)
-	@asdf plugin add golangci-lint || true
-	@asdf plugin add gosec || true
-	@asdf plugin add govulncheck || true
-	$(call print_info,Installing Go development tools...)
-	@asdf install golang || echo "Go already installed"
-	@asdf install golangci-lint || echo "golangci-lint already installed"
-	@asdf install gosec || echo "gosec already installed"
-	@asdf install govulncheck || echo "govulncheck already installed"
-	@asdf reshim
-	$(call print_success,Development tools installed successfully!)
+	$(call print_info,Downloading application dependencies...)
+	go mod download
+	$(call print_info,Downloading pinned Go tool dependencies...)
+	go mod download -modfile=$(TOOLS_MODFILE)
+	$(call print_success,Dependencies and Go tools are ready!)
 	@make verify-tools
 
 ## check-go-version: Verify Go version matches project requirements
@@ -134,7 +131,7 @@ check-go-version:
 	highest=$$(printf '%s\n%s\n' "$$required_version" "$$current_version" | sort -V | tail -1); \
 	if [ "$$highest" != "$$current_version" ]; then \
 		$(call print_error,Error: Go version $$required_version or newer required. Current version: go$$current_version); \
-		$(call print_info,Please update Go using: asdf install); \
+		$(call print_info,Please update Go or run: mise install); \
 		exit 1; \
 	fi
 	$(call print_success,Go version check passed!)
@@ -161,13 +158,9 @@ verify:
 verify-tools:
 	$(call print_info,Verifying development tools...)
 	@echo "Go version: $$(go version)"
-	@echo "golangci-lint version: $$(golangci-lint version)"
-	@if command -v govulncheck >/dev/null 2>&1 && govulncheck -version >/dev/null 2>&1; then \
-		echo "govulncheck version: $$(govulncheck -version)"; \
-	else \
-		echo "govulncheck version: fallback via go run v$(GOVULNCHECK_VERSION)"; \
-	fi
-	@echo "gosec version: $$(gosec -version 2>/dev/null || echo 'gosec not available')"
+	@echo "golangci-lint version: $$($(GOLANGCI_LINT) version)"
+	@echo "govulncheck version: $$(go list -modfile=$(TOOLS_MODFILE) -m -f '{{.Version}}' golang.org/x/vuln)"
+	@echo "gosec version: $$($(GOSEC) -version 2>/dev/null || echo 'gosec version unavailable')"
 	$(call print_success,Tool verification completed!)
 
 ## maintenance-update: Discover and sync pinned versions from maintenance manifest
@@ -191,7 +184,7 @@ maintenance-dry-run:
 	./scripts/maintenance/sync_files.sh >/dev/null; \
 	echo; \
 	echo "Pending maintenance changes:"; \
-	git --no-pager diff -- maintenance/versions.yaml .tool-versions .pre-commit-config.yaml go.mod .github/workflows scripts/setup.sh Makefile || true; \
+	git --no-pager diff -- maintenance/versions.yaml mise.toml tools/go.mod tools/go.sum .pre-commit-config.yaml go.mod .github/workflows scripts/setup.sh Makefile || true; \
 	rm -rf "$$tmp_dir"
 
 ## maintenance-tests: Run maintenance script tests
@@ -220,22 +213,22 @@ test:
 ## lint: Run golangci-lint
 lint: check-golangci-lint-version lint-config-check
 	$(call print_info,Running linter...)
-	golangci-lint run --timeout=10m
+	$(GOLANGCI_LINT) run --timeout=10m
 	$(call print_success,Linting completed!)
 
 ## lint-config-check: Verify golangci-lint configuration schema
 lint-config-check:
 	$(call print_info,Verifying golangci-lint config schema...)
-	golangci-lint config verify
+	$(GOLANGCI_LINT) config verify
 	$(call print_success,golangci-lint config schema check passed!)
 
 ## check-golangci-lint-version: Verify golangci-lint version is correct
 check-golangci-lint-version:
 	$(call print_info,Checking golangci-lint version...)
-	@if ! golangci-lint version | grep -q "version 2"; then \
+	@if ! $(GOLANGCI_LINT) version | grep -q "version 2"; then \
 		$(call print_error,Error: golangci-lint version 2.x required. Current version:); \
-		golangci-lint version; \
-		$(call print_info,Please run: asdf reshim golangci-lint); \
+		$(GOLANGCI_LINT) version; \
+		$(call print_info,Please run: go mod download -modfile=$(TOOLS_MODFILE)); \
 		exit 1; \
 	fi
 	$(call print_success,golangci-lint version check passed!)
@@ -243,13 +236,13 @@ check-golangci-lint-version:
 ## security: Run Gosec security scanner
 security:
 	$(call print_info,Running security scan...)
-	gosec -no-fail -fmt text ./...
+	$(GOSEC) -no-fail -fmt text ./...
 	$(call print_success,Security scan completed!)
 
 ## vulnerability-check: Run govulncheck
 vulnerability-check:
 	$(call print_info,Checking for vulnerabilities...)
-	@./scripts/ensure_govulncheck.sh $(GOVULNCHECK_VERSION) ./...
+	$(GOVULNCHECK) ./...
 	$(call print_success,Vulnerability check completed!)
 
 ## mod-tidy-check: Check if go mod tidy is needed

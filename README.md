@@ -107,6 +107,8 @@ This displays:
 ## Configuration Files
 
 - `.goreleaser.yml` - GoReleaser configuration for builds and releases
+- `mise.toml` - Go toolchain version for local development
+- `tools/go.mod` - Go-managed CLI tool pins for linting and security checks
 - `.github/workflows/quality.yml` - Pull request and main-branch quality gate
 - `.github/workflows/release-policy.yml` - PR title validation and release label management
 - `.github/workflows/release.yml` - Release pipeline

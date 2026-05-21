@@ -16,10 +16,9 @@ In this template repository, GitHub Actions/workflow pin updates are owned by te
 `maintenance/versions.yaml` is authoritative for:
 
 - Go language and toolchain versions
-- local tool versions in `.tool-versions`
+- Go CLI tool versions in `tools/go.mod`
 - GitHub Action versions used in workflows
 - pre-commit hook revisions
-- module versions referenced by setup scripts
 
 ## Weekly Automation
 
@@ -38,9 +37,10 @@ The workflow:
 This workflow is responsible for:
 
 - `.github/workflows/*.yml` action pin updates
-- `.tool-versions`
+- `mise.toml`
+- `tools/go.mod` and `tools/go.sum`
 - `.pre-commit-config.yaml`
-- pinned tool/module versions referenced by scripts and Make targets
+- pinned tool versions referenced by Make targets
 
 ## Local Maintenance Commands
 
@@ -57,7 +57,7 @@ Use one of these approaches:
 
 1. Let weekly automation propose changes in a PR.
 2. Apply explicit updates manually:
-   - `./scripts/maintenance/update_versions.sh --set tools.govulncheck=1.1.5 --set go_modules.govulncheck_module=v1.1.5`
+   - `./scripts/maintenance/update_versions.sh --set tools.govulncheck=1.1.5`
 3. Sync and validate:
    - `./scripts/maintenance/sync_files.sh`
    - `./scripts/maintenance/validate.sh`
@@ -65,7 +65,9 @@ Use one of these approaches:
 Always review generated diffs in:
 
 - `go.mod`
-- `.tool-versions`
+- `mise.toml`
+- `tools/go.mod`
+- `tools/go.sum`
 - `.pre-commit-config.yaml`
 - `.github/workflows/*.yml`
 - `scripts/setup.sh`
