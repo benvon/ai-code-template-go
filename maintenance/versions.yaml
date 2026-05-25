@@ -3,10 +3,10 @@ go:
   toolchain: "1.26.3"
 
 tools:
-  golangci_lint: "2.8.0"
-  gosec: "2.22.11"
-  govulncheck: "1.1.4"
-  goimports: "0.40.0"
+  golangci_lint: "2.12.2"
+  gosec: "2.26.1"
+  govulncheck: "1.3.0"
+  goimports: "0.45.0"
 
 github_actions:
   actions_checkout: "v6"
