@@ -1,12 +1,12 @@
 go:
   language: "1.26"
-  toolchain: "1.26.3"
+  toolchain: "1.26.5"
 
 tools:
   golangci_lint: "2.8.0"
   gosec: "2.22.11"
   govulncheck: "1.1.4"
-  goimports: "0.40.0"
+  goimports: "0.44.0"
 
 github_actions:
   actions_checkout: "v6"
