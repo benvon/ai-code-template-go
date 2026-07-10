@@ -13,6 +13,32 @@ updates:
     commit-message:
       prefix: "chore(deps)"
     groups:
-      go-dependencies:
+      go-version-updates:
+        applies-to: "version-updates"
+        patterns:
+          - "*"
+      go-security-updates:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
+
+  # Keep development tooling dependencies in one reviewable update.
+  - package-ecosystem: "gomod"
+    directory: "/tools"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      go-tool-version-updates:
+        applies-to: "version-updates"
+        patterns:
+          - "*"
+      go-tool-security-updates:
+        applies-to: "security-updates"
         patterns:
           - "*"
