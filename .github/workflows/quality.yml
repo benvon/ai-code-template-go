@@ -8,14 +8,24 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   quality:
     uses: benvon/reusable-workflows/.github/workflows/go-quality.yml@f70796de0a6527dbed267a64835c3cc81b8144e0
     with:
       quality_command: make ci-local
-      coverage_file: coverage.out
-      upload_codecov: true
-      codecov_flags: unittests
-      codecov_name: codecov-umbrella
+      upload_codecov: false
+  template:
+    # Scaffold invariants must not constrain applications created from this repo.
+    if: github.repository == 'benvon/ai-code-template-go'
+    name: Template adoption and recipes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: tools/go.sum
+      - run: make template-check

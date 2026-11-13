@@ -1,0 +1,34 @@
+# Copy to .github/workflows/release.yml only after adopting this recipe.
+name: release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  quality:
+    uses: benvon/reusable-workflows/.github/workflows/go-quality.yml@f70796de0a6527dbed267a64835c3cc81b8144e0
+    with:
+      quality_command: make ci-local
+      upload_codecov: false
+  release:
+    needs: quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: Publish binary archives
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          version: v2.20.0
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
