@@ -1,89 +1,53 @@
-# AI Agent Instructions
+# Project guidance
 
 ## General Guidelines
 
-* Focus on "why" and not "how" in documentation.
-* Test all return values for errors.
-* Use `const` for variables that are not reassigned.
-* Use short, imperative commit messages.
-* Separate unrelated changes into distinct commits.
-* Whenever possible, separate logic from dependencies or interfaces such that logic can be unit tested.
+This repository starts as one runnable Go executable. Keep the application
+module free of dependencies until a requirement justifies adding one.
+Read README.md and docs/TEMPLATE_ADOPTION.md for the baseline contract.
+Optional integrations live in docs/recipes; they are not application packages.
+
+Use Conventional Commits for commits and PR titles. Sign commits. Preserve
+unrelated work. Implementing a change does not authorize releases or deployment.
 
 ## Code Style
 
-* Go version 1.26+ with the latest patch release.
-* Avoid complex embedded logic in a single function. Break complex functions down into smaller functions.
-* Use strong typing wherever possible.
-* Don't use the `interface{}` construct. Use `any` instead.
-* Follow Go naming conventions (e.g., `ID` not `Id`, `URL` not `Url`)
-* Use meaningful variable names that describe intent
-* Keep functions small and focused (ideally under 20 lines)
+Use the Go version declared in go.mod and mise.toml. Format with `make fmt`.
+Keep packages focused; add cmd/, internal/, or public packages when needed.
+Prefer concrete types and the standard library. Profile before optimizing.
+Use `any` rather than `interface{}` and follow Go naming conventions.
 
 ## Testing
 
-* Write tests for all exported functions
-* Use table-driven tests for multiple test cases
-* Mock external dependencies using interfaces
-* Aim for >80% test coverage
-* Test both success and error paths
-* Use `t.Parallel()` for independent tests
+- `make check`: formatting, lint, and unit tests for everyday edits.
+- `make test`: tests with the race detector.
+- `make build`: native executable at bin/app.
+- `make ci-local`: complete application quality gate, including security checks.
+- `make template-check`: adoption, recipe, guardrail, and maintenance tests.
+
+Test meaningful behavior and failure paths. Use table tests and parallel tests
+where they improve clarity and isolation. Coverage is diagnostic; this baseline
+has no universal coverage percentage requirement.
 
 ## Error Handling
 
-* Always check error return values
-* Use `errors.Is()` and `errors.As()` for error comparison
-* Wrap errors with context using `fmt.Errorf("doing X: %w", err)`
-* Don't ignore errors with `_`
-
-## Performance
-
-* Use `sync.Pool` for frequently allocated objects
-* Prefer `strings.Builder` over string concatenation
-* Use `strconv` over `fmt` for basic conversions
-* Profile before optimizing
-
-## Project Structure
-
-* Use standard Go project layout:
-  - `cmd/` for main applications
-  - `internal/` for private application code
-  - `pkg/` for public libraries
-  - `api/` for API definitions
-  - `docs/` for documentation
-* Keep packages focused and cohesive
-* Avoid circular dependencies
-
-## Documentation
-
-* Write clear, descriptive function and variable names
-* Include comprehensive comments explaining business logic
-* Document exported functions with proper Go doc comments
-* Keep README.md up to date with clear examples
-* Document configuration options thoroughly
-* Include troubleshooting sections
-* Provide clear setup instructions
-
-## Dependencies
-
-* Minimize external dependencies
-* Use Go modules for dependency management
-* Pin dependency versions in go.mod
-* Regularly update dependencies for security patches
-* Use `go mod tidy` to clean up unused dependencies
+Check errors and add useful context with wrapping. Use errors.Is/errors.As
+when comparing wrapped errors. Keep process exit decisions in main so behavior
+can be tested without terminating the test process.
 
 ## Security
 
-* Validate all input data
-* Use HTTPS in production
-* Implement proper authentication and authorization
-* Follow OWASP guidelines
-* Use security scanning tools (gosec, govulncheck)
-* Never log sensitive information
+Never commit or log secrets. Treat external input as untrusted. Preserve
+least-privilege workflow permissions. Run the applicable checks and report
+unavailable or failed checks accurately. Consult SECURITY.md for reporting.
 
-## Logging and Monitoring
+## Ownership
 
-* Use structured logging (e.g., logrus, zap)
-* Include correlation IDs for request tracing
-* Log at appropriate levels (debug, info, warn, error)
-* Implement health checks and metrics
-* Use context for request cancellation and timeouts
+Application behavior lives in main.go until it needs separate packages.
+Go tool pins live in tools/go.mod; maintenance/versions.yaml and the existing
+maintenance scripts synchronize template pins. Do not hand-edit managed pins
+without checking docs/TEMPLATE_MAINTENANCE.md. Shared workflow behavior belongs
+in benvon/reusable-workflows; this repo selects an explicit workflow revision.
+
+Instructions in recipes apply only after adopting that capability. Do not add
+servers, database configuration, containers, or publishing automation by default.

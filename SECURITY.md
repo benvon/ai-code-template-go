@@ -1,51 +1,40 @@
-# Security Policy
+# Security policy
 
-## Supported Versions
+## Supported versions
 
-| Version | Supported |
-| ------- | --------- |
-| main    | ✅ |
-| latest release tag | ✅ |
-| older releases | ❌ |
+The upstream template maintains main. Repositories created from it own their
+application dependencies, supported releases, and security response policy.
 
-## Reporting a Vulnerability
+## Reporting a vulnerability
 
-Do not open public issues for vulnerabilities.
+Do not open public issues containing vulnerability details or secrets.
+For this repository, use GitHub's Security tab and private vulnerability
+reporting when available. If unavailable, obtain a private reporting channel
+from the maintainer before disclosing details. Adopters must configure a real
+security contact and an achievable response policy before accepting reports.
 
-Use one of these private channels:
+## Baseline controls
 
-1. GitHub Security Advisory (preferred): `Security` tab -> `Report a vulnerability`
-2. Maintainer security contact defined by your fork/organization
+The quality workflow runs Gosec and govulncheck through `make ci-local`.
+Dependabot proposes Go module updates. Dependency Review checks PR dependency
+changes when the repository supports the feature; its existing availability
+check can warn and skip analysis. A green workflow does not prove that this
+optional analysis ran. See issue #25 for tightening this contract.
 
-If you are adopting this template, replace this section with your real security contact and SLA.
+Configure required checks explicitly using docs/TEMPLATE_ADOPTION.md. Local
+commands do not configure repository protection settings. Secret scanning and
+push protection are repository/account features that adopters must verify.
 
-## Response Expectations
+CodeQL and additional scanning integrations are opt-in through the
+security-analysis recipe. This does not remove the need to address the risks
+of the application being built.
 
-- Initial acknowledgement: within 2 business days
-- Triage and severity assignment: within 7 calendar days
-- Critical fix target: within 30 calendar days
+## Secure development
 
-## Automated Security Controls
+Never commit credentials or log sensitive data. Validate external input at its
+trust boundary, check errors, preserve transport verification, and use least
+privilege. Workflow checks use read-only permissions unless an explicitly
+adopted integration requires more.
 
-This template includes:
-
-- Dependabot (`.github/dependabot.yml`)
-- Dependency Review workflow (`.github/workflows/dependency-review.yml`)
-- govulncheck in the shared quality workflow (`.github/workflows/quality.yml`)
-- CodeQL analysis (`.github/workflows/codeql.yml`)
-
-Blocking checks by default:
-
-- Dependency Review (high severity)
-- govulncheck job
-
-Advisory checks by default:
-
-- Additional static analysis or security scans you may add locally
-
-## Secure Contribution Guidance
-
-- Validate all input and handle errors safely.
-- Avoid logging secrets, tokens, and personal data.
-- Keep dependencies pinned and reviewed.
-- Prefer least-privilege permissions in GitHub workflows.
+Run applicable checks and report unavailable scans accurately. No scanner or
+coverage percentage substitutes for reviewing changed behavior and boundaries.

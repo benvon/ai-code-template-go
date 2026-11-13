@@ -1,132 +1,33 @@
-# Contributing to ai-code-template-go
+# Contributing
 
-Thank you for your interest in contributing to this AI-assisted Go template repository! This guide will help you get started.
+Describe the problem and desired result before making a substantial change.
+For template changes, consider what every new repository would inherit.
 
-## Code of Conduct
+## Workflow
 
-By participating in this project, you agree to abide by our Code of Conduct. Please be respectful and inclusive in all interactions.
+1. Create a feature branch and keep unrelated changes separate.
+2. Make the smallest maintainable change and add behavior tests where needed.
+3. Run `make check`, `make test`, and `make build` during development.
+4. Run `make ci-local` before review, plus `make template-check` for scaffold,
+   recipe, workflow, or maintenance changes.
+5. Sign commits and use Conventional Commits, such as `feat: add a command`.
+6. Open a PR with the problem, resulting behavior, and exact verification results.
 
-## How Can I Contribute?
+Use `make setup` to download pinned tools after supplying the Go version from
+mise.toml. Optional editor settings and hooks are in docs/recipes/editor-hooks.
+Do not install a parallel global toolchain just to run the checks.
 
-### Reporting Bugs
+## Scope and review
 
-- Use the bug report template when creating issues
-- Include detailed steps to reproduce
-- Provide your Go version, OS, and platform information
-- Include relevant log output
+The baseline is a runnable executable. Services, libraries, publishing, and
+other integrations are deliberate recipe adoptions. Keep package structure
+proportional to the project and explain new dependencies.
 
-### Suggesting Features
+Tests should exercise behavior and meaningful failure paths. Prefer isolated
+fixtures; use parallel tests when they do not share mutable state. Document
+unavailable checks without claiming they passed.
 
-- Use the feature request template
-- Clearly describe the use case
-- Explain how it would benefit users of this template
+PR titles use Conventional Commits. Title validation is read-only and does not
+release artifacts. Release or deployment needs explicit authorization.
 
-### Submitting Pull Requests
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Add tests for your changes
-5. Run the test suite (`go test ./...`)
-6. Run linting (`make lint`)
-7. Commit your changes (`git commit -m 'Add amazing feature'`)
-8. Push to your branch (`git push origin feature/amazing-feature`)
-9. Open a Pull Request using the PR template
-
-## Development Setup
-
-### Prerequisites
-
-- Go 1.26 or later
-- Git
-- golangci-lint (for linting)
-- GoReleaser (for testing releases)
-
-### Local Development
-
-```bash
-# Clone your fork
-git clone https://github.com/YOUR-USERNAME/ai-code-template-go.git
-cd ai-code-template-go
-
-# Install dependencies
-go mod tidy
-
-# Run tests
-go test ./...
-
-# Run linter
-make lint
-
-# Run guardrails and maintenance checks
-make maintenance-validate
-./scripts/check_guardrails.sh
-
-# Build locally
-go build -o ./bin/app ./
-```
-
-## Coding Standards
-
-### Go Style Guide
-
-- Follow the [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
-- Use `gofmt` to format your code
-- Run `make lint` before submitting
-- Write meaningful commit messages
-
-### Testing
-
-- Write unit tests for new functionality
-- Maintain or improve test coverage
-- Use table-driven tests where appropriate
-- Mock external dependencies
-
-### Documentation
-
-- Update README.md if you add new features
-- Add inline comments for complex logic
-- Update API documentation if applicable
-
-## AI-Assisted Development Guidelines
-
-This template is designed to work well with AI coding assistants. When contributing:
-
-### For AI-Friendly Code
-
-- Write clear, descriptive function and variable names
-- Include comprehensive comments explaining business logic
-- Structure code in small, focused functions
-- Use consistent naming conventions
-
-### Documentation for AI Context
-
-- Keep README.md up to date with clear examples
-- Document configuration options thoroughly
-- Include troubleshooting sections
-- Provide clear setup instructions
-
-## Release Process
-
-This project uses semantic versioning and automated releases:
-
-1. Changes are made via pull requests
-2. Releases are triggered by pushing version tags
-3. GoReleaser handles building and publishing
-4. Release notes are generated automatically
-
-## Getting Help
-
-- Check existing issues and discussions
-- Ask questions in GitHub Discussions
-- Read the documentation thoroughly
-- Look at existing code for examples
-
-## Recognition
-
-Contributors are recognized in:
-- Release notes
-- GitHub contributors list
-- Special mentions for significant contributions
-
-Thank you for helping make this template better for the Go and AI community!
+Report sensitive vulnerabilities through the channels in SECURITY.md.

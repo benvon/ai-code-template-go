@@ -1,46 +1,15 @@
-## Description
+## Change
 
-Please include a summary of the changes and related issue. Include motivation and context.
+Describe the problem, the resulting behavior, and the related issue.
 
-Fixes # (issue)
+## Verification
 
-## Type of change
+List exact commands, results, and checks that were unavailable.
 
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Breaking change
-- [ ] Documentation update
-- [ ] Performance improvement
-- [ ] Code refactoring
-- [ ] Test improvement
+- AI used?: <!-- tools used, or no -->
+- Human-verified tests run: <!-- only commands a human actually ran; use none if applicable -->
+- Security-sensitive areas touched: <!-- auth, secrets, data access, workflows, or none -->
 
-## AI Disclosure
+## Review notes
 
-- AI used?: <!-- yes/no; tools used -->
-- Human-verified tests run: <!-- exact commands -->
-- Security-sensitive areas touched: <!-- auth, crypto, secrets, data access, infra, or none -->
-
-## How Has This Been Tested?
-
-- [ ] Unit tests
-- [ ] Integration tests
-- [ ] Manual testing
-
-**Test Configuration**:
-- Go version:
-- OS:
-- Platform:
-
-## Checklist
-
-- [ ] I have performed a self-review
-- [ ] I updated documentation where needed
-- [ ] I added/updated tests for changed behavior
-- [ ] `go test ./...` passes locally
-- [ ] `golangci-lint run` passes locally
-- [ ] `make maintenance-validate` passes locally
-- [ ] I ran `go mod tidy` and committed module changes
-
-## Additional Notes
-
-Add any additional notes here.
+Explain compatibility changes, remaining risks, and documentation updates.

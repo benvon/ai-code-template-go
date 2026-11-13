@@ -36,7 +36,7 @@ PRE_COMMIT_GOLANG_REV="$(yaml_get "${MANIFEST}" pre_commit_hooks pre_commit_gola
 GO_MOD_FILE="${ROOT}/go.mod"
 TOOLS_GO_MOD_FILE="${ROOT}/tools/go.mod"
 MISE_FILE="${ROOT}/mise.toml"
-PRE_COMMIT_FILE="${ROOT}/.pre-commit-config.yaml"
+PRE_COMMIT_FILE="${ROOT}/docs/recipes/editor-hooks/pre-commit-config.yaml"
 
 replace_line "${GO_MOD_FILE}" '^go[[:space:]]+[0-9]+[.][0-9]+([.][0-9]+)?$' "go ${GO_LANGUAGE}"
 replace_line "${GO_MOD_FILE}" '^toolchain[[:space:]]+go[0-9]+[.][0-9]+([.][0-9]+)?$' "toolchain go${GO_TOOLCHAIN}"

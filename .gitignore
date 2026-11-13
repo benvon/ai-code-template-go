@@ -63,8 +63,8 @@ temp/
 # Pre-commit cache
 .pre-commit-config.yaml.bak
 
-# Docker
-.dockerignore
+# Worktrees
+.worktrees/
 
 # Air live reload
 tmp/

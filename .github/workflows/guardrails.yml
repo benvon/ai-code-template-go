@@ -53,3 +53,14 @@ jobs:
           if [ "$missing" -ne 0 ]; then
             exit 1
           fi
+
+      - name: Check Conventional Commit title
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const pattern = /^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([^()\r\n]+\))?!?: \S.*$/;
+            if (!pattern.test(title)) {
+              core.setFailed('Use a Conventional Commit PR title, for example feat: add a command.');
+            }

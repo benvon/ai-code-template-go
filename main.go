@@ -1,29 +1,25 @@
-// Package main provides the CLI entrypoint for version and startup output.
+// Package main provides the application's executable entrypoint.
 package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 )
 
-// These variables will be set at build time by goreleaser
-var (
-	version = "dev"
-	commit  = "none"
-	date    = "unknown"
-	builtBy = "unknown"
-)
+const applicationName = "ai-code-template-go"
 
 func main() {
-	if len(os.Args) > 1 && (os.Args[1] == "--version" || os.Args[1] == "-v") {
-		fmt.Printf("ai-code-template-go %s\n", version)
-		fmt.Printf("  commit: %s\n", commit)
-		fmt.Printf("  built at: %s\n", date)
-		fmt.Printf("  built by: %s\n", builtBy)
-		return
+	if err := run(os.Stdout); err != nil {
+		log.Print(err)
+		os.Exit(1)
 	}
+}
 
-	log.Println("Hello from ai-code-template-go!")
-	log.Printf("This is version %s (commit %s)", version, commit)
+func run(output io.Writer) error {
+	if _, err := fmt.Fprintf(output, "Hello from %s!\n", applicationName); err != nil {
+		return fmt.Errorf("writing greeting: %w", err)
+	}
+	return nil
 }

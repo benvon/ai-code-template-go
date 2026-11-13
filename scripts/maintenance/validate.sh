@@ -66,8 +66,7 @@ expect_match "${ROOT}/tools/go.mod" "github.com/securego/gosec/v2/cmd/gosec" "to
 expect_match "${ROOT}/tools/go.mod" "golang.org/x/vuln/cmd/govulncheck" "tools/go.mod govulncheck tool missing"
 expect_match "${ROOT}/tools/go.mod" "golang.org/x/tools/cmd/goimports" "tools/go.mod goimports tool missing"
 
-expect_match "${ROOT}/.pre-commit-config.yaml" "rev:[[:space:]]+${PRE_COMMIT_HOOKS_REV}" "pre-commit-hooks rev drift"
-expect_match "${ROOT}/.pre-commit-config.yaml" "rev:[[:space:]]+${PRE_COMMIT_GOLANG_REV}" "pre-commit-golang rev drift"
+expect_match "${ROOT}/docs/recipes/editor-hooks/pre-commit-config.yaml" "rev:[[:space:]]+${PRE_COMMIT_HOOKS_REV}" "pre-commit-hooks rev drift"
 
 for file in "${ROOT}/.github/workflows"/*.yml; do
   [ -f "${file}" ] || continue
@@ -112,9 +111,6 @@ for file in "${ROOT}/.github/workflows"/*.yml; do
   check_no_latest "${file}"
 done
 
-expect_match "${ROOT}/scripts/setup.sh" "go tool -modfile=tools/go.mod golangci-lint" "setup golangci-lint go tool usage missing"
-expect_match "${ROOT}/scripts/setup.sh" "go tool -modfile=tools/go.mod govulncheck" "setup govulncheck go tool usage missing"
-expect_match "${ROOT}/scripts/setup.sh" "go tool -modfile=tools/go.mod gosec" "setup gosec go tool usage missing"
 expect_match "${ROOT}/Makefile" "^TOOLS_MODFILE := tools/go.mod$" "Makefile tools module drift"
 
 check_no_latest "${ROOT}/scripts/setup.sh"

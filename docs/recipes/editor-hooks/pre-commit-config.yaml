@@ -1,0 +1,29 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-json
+      - id: check-toml
+      - id: detect-private-key
+      - id: name-tests-test
+
+  - repo: local
+    hooks:
+      - id: go-format
+        name: Format application Go files
+        entry: make fmt
+        language: system
+        types: [go]
+        pass_filenames: false
+      - id: go-check
+        name: Check application
+        entry: make check
+        language: system
+        pass_filenames: false
+        always_run: true
